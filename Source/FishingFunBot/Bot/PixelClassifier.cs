@@ -29,8 +29,8 @@ namespace FishingFun
             if (isWowClasic)
             {
                 LogManager.GetLogger("Fishbot").Info("Wow Classic configuration");
-                this.ColourMultiplier = 1;
-                this.ColourClosenessMultiplier = 1;
+                ColourMultiplier = 1;
+                ColourClosenessMultiplier = 1;
             }
             else
             {
@@ -45,8 +45,8 @@ namespace FishingFun
 
         private bool areClose(byte color1, byte color2)
         {
-            var max = Math.Max(color1, color2);
-            var min = Math.Min(color1, color2);
+            byte max = Math.Max(color1, color2);
+            byte min = Math.Min(color1, color2);
 
             return min * ColourClosenessMultiplier > max - 20;
         }

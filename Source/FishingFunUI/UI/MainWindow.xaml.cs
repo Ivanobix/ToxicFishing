@@ -1,30 +1,30 @@
-﻿#nullable enable
+﻿using log4net.Appender;
+using log4net.Core;
+using log4net.Repository.Hierarchy;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Timers;
+using System.Windows;
+using System.Windows.Controls;
+
+#nullable enable
 namespace FishingFun
 {
-    using log4net.Appender;
-    using log4net.Core;
-    using log4net.Repository.Hierarchy;
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Timers;
-    using System.Windows;
-    using System.Windows.Controls;
-
     public partial class MainWindow : Window, IAppender
     {
         private System.Drawing.Point lastPoint = System.Drawing.Point.Empty;
         public ObservableCollection<LogEntry> LogEntries { get; set; }
 
-        private IBobberFinder bobberFinder;
-        private IPixelClassifier pixelClassifier;
-        private IBiteWatcher biteWatcher;
-        private ReticleDrawer reticleDrawer = new ReticleDrawer();
+        private readonly IBobberFinder bobberFinder;
+        private readonly IPixelClassifier pixelClassifier;
+        private readonly IBiteWatcher biteWatcher;
+        private readonly ReticleDrawer reticleDrawer = new ReticleDrawer();
 
         private FishingBot? bot;
-        private int strikeValue = 7; // this is the depth the bobber must go for the bite to be detected
+        private readonly int strikeValue = 7; // this is the depth the bobber must go for the bite to be detected
         private bool setImageBackgroundColour = true;
-        private Timer WindowSizeChangedTimer;
+        private readonly Timer WindowSizeChangedTimer;
         private System.Threading.Thread? botThread;
 
         public MainWindow()
@@ -33,29 +33,28 @@ namespace FishingFun
 
             ((Logger)FishingBot.logger.Logger).AddAppender(this);
 
-            this.DataContext = LogEntries = new ObservableCollection<LogEntry>();
-            this.pixelClassifier = new PixelClassifier();
+            DataContext = LogEntries = new ObservableCollection<LogEntry>();
+            pixelClassifier = new PixelClassifier();
             pixelClassifier.SetConfiguration(WowProcess.IsWowClassic());
-             
-            this.bobberFinder = new SearchBobberFinder(pixelClassifier);
 
-            var imageProvider = bobberFinder as IImageProvider;
-            if (imageProvider != null)
+            bobberFinder = new SearchBobberFinder(pixelClassifier);
+
+            if (bobberFinder is IImageProvider imageProvider)
             {
                 imageProvider.BitmapEvent += ImageProvider_BitmapEvent;
             }
 
-            this.biteWatcher = new PositionBiteWatcher(strikeValue);
+            biteWatcher = new PositionBiteWatcher(strikeValue);
 
-            this.WindowSizeChangedTimer = new Timer { AutoReset = false, Interval = 100 };
-            this.WindowSizeChangedTimer.Elapsed += SizeChangedTimer_Elapsed;
-            this.CardGrid.SizeChanged += MainWindow_SizeChanged;
-            this.Closing += (s, e) => botThread?.Abort();
+            WindowSizeChangedTimer = new Timer { AutoReset = false, Interval = 100 };
+            WindowSizeChangedTimer.Elapsed += SizeChangedTimer_Elapsed;
+            CardGrid.SizeChanged += MainWindow_SizeChanged;
+            Closing += (s, e) => botThread?.Abort();
 
-            this.KeyChooser.CastKeyChanged += (s, e) =>
+            KeyChooser.CastKeyChanged += (s, e) =>
             {
-                this.Settings.Focus();
-                this.bot?.SetCastKey(this.KeyChooser.CastKey);
+                _ = Settings.Focus();
+                bot?.SetCastKey(KeyChooser.CastKey);
             };
         }
 
@@ -68,25 +67,34 @@ namespace FishingFun
 
         private void SizeChangedTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            this.Dispatch(() =>
+            Dispatch(() =>
             {
-                this.flyingFishAnimation.AnimationWidth = (int)this.ActualWidth;
-                this.flyingFishAnimation.AnimationHeight = (int)this.ActualHeight;
-                this.LogGrid.Height = this.LogFlipper.ActualHeight;
-                this.GraphGrid.Height = this.GraphFlipper.ActualHeight;
-                this.GraphGrid.Visibility = Visibility.Visible;
-                this.GraphFlipper.IsFlipped = true;
-                this.LogFlipper.IsFlipped = true;
-                this.GraphFlipper.IsFlipped = false;
-                this.LogFlipper.IsFlipped = false;
+                flyingFishAnimation.AnimationWidth = (int)ActualWidth;
+                flyingFishAnimation.AnimationHeight = (int)ActualHeight;
+                LogGrid.Height = LogFlipper.ActualHeight;
+                GraphGrid.Height = GraphFlipper.ActualHeight;
+                GraphGrid.Visibility = Visibility.Visible;
+                GraphFlipper.IsFlipped = true;
+                LogFlipper.IsFlipped = true;
+                GraphFlipper.IsFlipped = false;
+                LogFlipper.IsFlipped = false;
             });
         }
 
-        private void Stop_Click(object sender, RoutedEventArgs e) => bot?.Stop();
+        private void Stop_Click(object sender, RoutedEventArgs e)
+        {
+            bot?.Stop();
+        }
 
-        private void Settings_Click(object sender, RoutedEventArgs e) => new ColourConfiguration(this.pixelClassifier).Show();
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            new ColourConfiguration(pixelClassifier).Show();
+        }
 
-        private void CastKey_Click(object sender, RoutedEventArgs e) => this.KeyChooser.Focus();
+        private void CastKey_Click(object sender, RoutedEventArgs e)
+        {
+            _ = KeyChooser.Focus();
+        }
 
         private void FishingEventHandler(object sender, FishingEvent e)
         {
@@ -95,21 +103,21 @@ namespace FishingFun
                 switch (e.Action)
                 {
                     case FishingAction.BobberMove:
-                        if (!this.GraphFlipper.IsFlipped)
+                        if (!GraphFlipper.IsFlipped)
                         {
-                            this.Chart.Add(e.Amplitude);
+                            Chart.Add(e.Amplitude);
                         }
                         break;
 
                     case FishingAction.Loot:
-                        this.flyingFishAnimation.Start();
-                        this.LootingGrid.Visibility = Visibility.Visible;
+                        flyingFishAnimation.Start();
+                        LootingGrid.Visibility = Visibility.Visible;
                         break;
 
                     case FishingAction.Cast:
-                        this.Chart.ClearChart();
-                        this.LootingGrid.Visibility = Visibility.Collapsed;
-                        this.flyingFishAnimation.Stop();
+                        Chart.ClearChart();
+                        LootingGrid.Visibility = Visibility.Collapsed;
+                        flyingFishAnimation.Stop();
                         setImageBackgroundColour = true;
                         break;
                 };
@@ -137,10 +145,10 @@ namespace FishingFun
         {
             Dispatch(() =>
             {
-                this.Play.IsEnabled = isBotRunning;
-                this.Stop.IsEnabled = !this.Play.IsEnabled;
-                SetImageVisibility(this.PlayImage, this.PlayImage_Disabled, this.Play.IsEnabled);
-                SetImageVisibility(this.StopImage, this.StopImage_Disabled, this.Stop.IsEnabled);
+                Play.IsEnabled = isBotRunning;
+                Stop.IsEnabled = !Play.IsEnabled;
+                SetImageVisibility(PlayImage, PlayImage_Disabled, Play.IsEnabled);
+                SetImageVisibility(StopImage, StopImage_Disabled, Stop.IsEnabled);
             });
         }
 
@@ -152,19 +160,19 @@ namespace FishingFun
                 System.Threading.Thread.Sleep(1500);
 
                 SetButtonStates(false);
-                botThread = new System.Threading.Thread(new System.Threading.ThreadStart(this.BotThread));
+                botThread = new System.Threading.Thread(new System.Threading.ThreadStart(BotThread));
                 botThread.Start();
 
                 // Hide cards after 10 minutes
-                var timer = new Timer { Interval = 1000 * 60 * 10, AutoReset = false };
-                timer.Elapsed += (s, ev) => this.Dispatch(() => this.LogFlipper.IsFlipped = this.GraphFlipper.IsFlipped = true);
+                Timer timer = new Timer { Interval = 1000 * 60 * 10, AutoReset = false };
+                timer.Elapsed += (s, ev) => Dispatch(() => LogFlipper.IsFlipped = GraphFlipper.IsFlipped = true);
                 timer.Start();
             }
         }
 
         public void BotThread()
         {
-            bot = new FishingBot(bobberFinder, this.biteWatcher, KeyChooser.CastKey, new List<ConsoleKey> { ConsoleKey.D5, ConsoleKey.D6 });
+            bot = new FishingBot(bobberFinder, biteWatcher, KeyChooser.CastKey, new List<ConsoleKey> { ConsoleKey.D5, ConsoleKey.D6 });
             bot.FishingEventHandler += FishingEventHandler;
             bot.Start();
 
@@ -178,25 +186,25 @@ namespace FishingFun
             {
                 SetBackgroundImageColour(e);
                 reticleDrawer.Draw(e.Bitmap, e.Point);
-                var bitmapImage = e.Bitmap.ToBitmapImage();
+                System.Windows.Media.Imaging.BitmapImage bitmapImage = e.Bitmap.ToBitmapImage();
                 e.Bitmap.Dispose();
-                this.Screenshot.Source = bitmapImage;
+                Screenshot.Source = bitmapImage;
             });
         }
 
         private void SetBackgroundImageColour(BobberBitmapEvent e)
         {
-            if (this.setImageBackgroundColour)
+            if (setImageBackgroundColour)
             {
-                this.setImageBackgroundColour = false;
-                this.ImageBackground.Background = e.Bitmap.GetBackgroundColourBrush();
+                setImageBackgroundColour = false;
+                ImageBackground.Background = e.Bitmap.GetBackgroundColourBrush();
             }
         }
 
         private void Dispatch(Action action)
         {
-            Application.Current?.Dispatcher.BeginInvoke((Action)(() => action()));
-            Application.Current?.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, new Action(delegate { }));
+            _ = (Application.Current?.Dispatcher.BeginInvoke((Action)(() => action())));
+            _ = (Application.Current?.Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, new Action(delegate { })));
         }
     }
 }

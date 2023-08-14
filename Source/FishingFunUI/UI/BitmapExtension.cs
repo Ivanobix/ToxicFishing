@@ -9,21 +9,19 @@ namespace FishingFun
     {
         public static BitmapImage ToBitmapImage(this System.Drawing.Bitmap bitmap)
         {
-            using (var memory = new MemoryStream())
-            {
-                bitmap.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
+            using MemoryStream memory = new MemoryStream();
+            bitmap.Save(memory, ImageFormat.Png);
+            memory.Position = 0;
 
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
+            BitmapImage bitmapImage = new BitmapImage();
+            bitmapImage.BeginInit();
+            bitmapImage.StreamSource = memory;
+            bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+            bitmapImage.EndInit();
+            bitmapImage.Freeze();
 
-                memory.Dispose();
-                return bitmapImage;
-            }
+            memory.Dispose();
+            return bitmapImage;
         }
 
         public static Brush GetBackgroundColourBrush(this System.Drawing.Bitmap bitmap)
@@ -35,7 +33,7 @@ namespace FishingFun
             {
                 for (int y = 0; y < bitmap.Height; y++)
                 {
-                    var pixel = bitmap.GetPixel(x, y);
+                    System.Drawing.Color pixel = bitmap.GetPixel(x, y);
                     r += pixel.R;
                     g += pixel.G;
                     b += pixel.B;

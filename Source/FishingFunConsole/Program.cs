@@ -1,9 +1,9 @@
 ﻿using FishingFun;
 using log4net;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Powershell
 {
@@ -11,11 +11,11 @@ namespace Powershell
     {
         private static void Main(string[] args)
         {
-            log4net.Config.XmlConfigurator.Configure(new FileStream("log4net.config", FileMode.Open));
+            _ = log4net.Config.XmlConfigurator.Configure(new FileStream("log4net.config", FileMode.Open));
 
             int strikeValue = 7;
 
-            var pixelClassifier = new PixelClassifier();
+            PixelClassifier pixelClassifier = new PixelClassifier();
             if (args.Contains("blue"))
             {
                 Console.WriteLine("Blue mode");
@@ -24,10 +24,10 @@ namespace Powershell
 
             pixelClassifier.SetConfiguration(WowProcess.IsWowClassic());
 
-            var bobberFinder = new SearchBobberFinder(pixelClassifier);
-            var biteWatcher = new PositionBiteWatcher(strikeValue);
+            SearchBobberFinder bobberFinder = new SearchBobberFinder(pixelClassifier);
+            PositionBiteWatcher biteWatcher = new PositionBiteWatcher(strikeValue);
 
-            var bot = new FishingBot(bobberFinder, biteWatcher, ConsoleKey.D4, new List<ConsoleKey> { ConsoleKey.D5 });
+            FishingBot bot = new FishingBot(bobberFinder, biteWatcher, ConsoleKey.D4, new List<ConsoleKey> { ConsoleKey.D5 });
             bot.FishingEventHandler += (b, e) => LogManager.GetLogger("Fishbot").Info(e);
 
             WowProcess.PressKey(ConsoleKey.Spacebar);

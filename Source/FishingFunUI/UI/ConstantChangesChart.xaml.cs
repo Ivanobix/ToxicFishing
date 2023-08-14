@@ -21,7 +21,7 @@ namespace FishingFun
         public ConstantChangesChart()
         {
             InitializeComponent();
-            this.Chart.DisableAnimations = false;
+            Chart.DisableAnimations = false;
 
             //To handle live data easily, in this case we built a specialized type
             //the MeasureModel class, it only contains 2 properties
@@ -34,7 +34,7 @@ namespace FishingFun
             //you can configure series in many ways, learn more at
             //http://lvcharts.net/App/examples/v1/wpf/Types%20and%20Configuration
 
-            var mapper = Mappers.Xy<MeasureModel>()
+            CartesianMapper<MeasureModel> mapper = Mappers.Xy<MeasureModel>()
                 .X(model => model.DateTime.Ticks)   //use DateTime.Ticks as X
                 .Y(model => model.Value);           //use the value property as Y
 
@@ -74,7 +74,7 @@ namespace FishingFun
 
         internal void Add(int value)
         {
-            var now = DateTime.Now;
+            DateTime now = DateTime.Now;
 
             ChartValues.Add(new MeasureModel
             {
@@ -87,9 +87,9 @@ namespace FishingFun
 
         public void ClearChart()
         {
-            this.ChartValues.Clear();
-            this.ChartValues2.Clear();
-            this.ChartValues3.Clear();
+            ChartValues.Clear();
+            ChartValues2.Clear();
+            ChartValues3.Clear();
 
             ChartValues2.Add(new MeasureModel
             {
@@ -126,7 +126,7 @@ namespace FishingFun
 
         public double AxisMax
         {
-            get { return _axisMax; }
+            get => _axisMax;
             set
             {
                 _axisMax = value;
@@ -136,7 +136,7 @@ namespace FishingFun
 
         public double AxisMin
         {
-            get { return _axisMin; }
+            get => _axisMin;
             set
             {
                 _axisMin = value;
@@ -156,8 +156,7 @@ namespace FishingFun
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            if (PropertyChanged != null)
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         #endregion INotifyPropertyChanged implementation

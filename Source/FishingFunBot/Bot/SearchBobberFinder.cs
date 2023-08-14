@@ -12,7 +12,7 @@ namespace FishingFun
     {
         private readonly IPixelClassifier pixelClassifier;
 
-        private static ILog logger = LogManager.GetLogger("Fishbot");
+        private static readonly ILog logger = LogManager.GetLogger("Fishbot");
 
         private Point previousLocation;
 
@@ -28,12 +28,12 @@ namespace FishingFun
 
         public void Reset()
         {
-            this.previousLocation = Point.Empty;
+            previousLocation = Point.Empty;
         }
 
         public Point Find()
         {
-            this.bitmap = WowScreen.GetBitmap();
+            bitmap = WowScreen.GetBitmap();
 
             Score? best = Score.ScorePoints(FindRedPoints());
 
@@ -49,24 +49,24 @@ namespace FishingFun
                 previousLocation = best.point;
             }
 
-            BitmapEvent?.Invoke(this, new BobberBitmapEvent { Point = new Point(previousLocation.X, previousLocation.Y), Bitmap = this.bitmap });
+            BitmapEvent?.Invoke(this, new BobberBitmapEvent { Point = new Point(previousLocation.X, previousLocation.Y), Bitmap = bitmap });
 
-            this.bitmap.Dispose();
+            bitmap.Dispose();
 
             return previousLocation == Point.Empty ? Point.Empty : WowScreen.GetScreenPositionFromBitmapPostion(previousLocation);
         }
 
         private List<Score> FindRedPoints()
         {
-            var points = new List<Score>();
+            List<Score> points = new List<Score>();
 
-            var hasPreviousLocation = previousLocation != Point.Empty;
+            bool hasPreviousLocation = previousLocation != Point.Empty;
 
             // search around last found location
-            var minX = Math.Max(hasPreviousLocation ? previousLocation.X - 40 : 0, 0);
-            var maxX = Math.Min(hasPreviousLocation ? previousLocation.X + 40 : this.bitmap.Width, this.bitmap.Width);
-            var minY = Math.Max(hasPreviousLocation ? previousLocation.Y - 40 : 0, 0);
-            var maxY = Math.Min(hasPreviousLocation ? previousLocation.Y + 40 : this.bitmap.Height, this.bitmap.Height);
+            int minX = Math.Max(hasPreviousLocation ? previousLocation.X - 40 : 0, 0);
+            int maxX = Math.Min(hasPreviousLocation ? previousLocation.X + 40 : bitmap.Width, bitmap.Width);
+            int minY = Math.Max(hasPreviousLocation ? previousLocation.Y - 40 : 0, 0);
+            int maxY = Math.Min(hasPreviousLocation ? previousLocation.Y + 40 : bitmap.Height, bitmap.Height);
 
             //System.Diagnostics.Debug.WriteLine($"Search from X {minX}-{maxX}, Y {minY}-{maxY}");
 
@@ -84,11 +84,11 @@ namespace FishingFun
 
             if (sw.ElapsedMilliseconds > 200)
             {
-                var prevText = hasPreviousLocation ? " using previous location" : "";
+                string prevText = hasPreviousLocation ? " using previous location" : "";
                 Debug.WriteLine($"Feather points found: {points.Count} in {sw.ElapsedMilliseconds}{prevText}.");
             }
 
-            if (points.Count>1000)
+            if (points.Count > 1000)
             {
                 logger.Error("Error: Too much of the feather colour in this image, please adjust the colour configuration !");
                 points.Clear();
@@ -99,14 +99,14 @@ namespace FishingFun
 
         private void ProcessPixel(List<Score> points, int x, int y)
         {
-            var p = this.bitmap.GetPixel(x, y);
+            Color p = bitmap.GetPixel(x, y);
 
-            bool isMatch = this.pixelClassifier.IsMatch(p.R, p.G, p.B);
+            bool isMatch = pixelClassifier.IsMatch(p.R, p.G, p.B);
 
             if (isMatch)
             {
                 points.Add(new Score { point = new Point(x, y) });
-                this.bitmap.SetPixel(x, y, this.pixelClassifier.Mode == PixelClassifier.ClassifierMode.Blue ? Color.Blue : Color.Red);
+                bitmap.SetPixel(x, y, pixelClassifier.Mode == PixelClassifier.ClassifierMode.Blue ? Color.Blue : Color.Red);
             }
         }
 
@@ -124,7 +124,7 @@ namespace FishingFun
                         .Count();
                 }
 
-                var best = points.OrderByDescending(s => s.count).FirstOrDefault();
+                Score? best = points.OrderByDescending(s => s.count).FirstOrDefault();
 
                 if (best != null)
                 {

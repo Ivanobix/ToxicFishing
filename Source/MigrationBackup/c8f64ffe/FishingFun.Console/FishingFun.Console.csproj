@@ -4,13 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FE3FE463-DEE3-459C-8C9D-9E872AB5FFA9}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FishingFunBot</RootNamespace>
-    <AssemblyName>FishingFunBot</AssemblyName>
+    <ProjectGuid>{3E15D1B8-0C79-40E8-8BA4-192DD862F7A2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Powershell</RootNamespace>
+    <AssemblyName>Powershell</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup>
@@ -18,6 +18,7 @@
     <nullable>enable</nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -28,6 +29,7 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release\</OutputPath>
@@ -36,12 +38,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=2.0.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.15\lib\net45\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,26 +53,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bot\BobberColourPointFinder.cs" />
-    <Compile Include="Bot\ClassifierMode.cs" />
-    <Compile Include="Bot\FishBot.cs" />
-    <Compile Include="Bot\Interfaces\IBiteWatcher.cs" />
-    <Compile Include="Bot\Interfaces\IBobberFinder.cs" />
-    <Compile Include="Bot\Interfaces\IImageProvider.cs" />
-    <Compile Include="Bot\Interfaces\IPixelClassifier.cs" />
-    <Compile Include="Bot\PixelClassifier.cs" />
-    <Compile Include="Bot\PositionBiteWatcher.cs" />
-    <Compile Include="Bot\SearchBobberFinder.cs" />
-    <Compile Include="Platform\Keys.cs" />
-    <Compile Include="Platform\TimedAction.cs" />
-    <Compile Include="Platform\WowProcess.cs" />
-    <Compile Include="Platform\WowScreen.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="log4net">
-      <Version>2.0.15</Version>
-    </PackageReference>
+    <None Include="App.config" />
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FishingFunBot\FishingFun.Bot.csproj">
+      <Project>{fe3fe463-dee3-459c-8c9d-9e872ab5ffa9}</Project>
+      <Name>FishingFun.Bot</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

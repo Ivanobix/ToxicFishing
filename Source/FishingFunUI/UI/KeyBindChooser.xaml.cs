@@ -9,7 +9,7 @@ namespace FishingFun
     {
         public ConsoleKey CastKey { get; set; } = ConsoleKey.D4;
 
-        private static string Filename = "keybind.txt";
+        private static readonly string Filename = "keybind.txt";
 
         public EventHandler CastKeyChanged;
 
@@ -27,16 +27,16 @@ namespace FishingFun
             {
                 if (File.Exists(Filename))
                 {
-                    var contents = File.ReadAllText(Filename);
+                    string contents = File.ReadAllText(Filename);
                     CastKey = (ConsoleKey)int.Parse(contents);
-                    KeyBind.Text = GetCastKeyText(this.CastKey);
+                    KeyBind.Text = GetCastKeyText(CastKey);
                 }
             }
             catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 CastKey = ConsoleKey.D4;
-                KeyBind.Text = GetCastKeyText(this.CastKey);
+                KeyBind.Text = GetCastKeyText(CastKey);
             }
         }
 
@@ -52,7 +52,7 @@ namespace FishingFun
 
         private void KeyBind_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
         {
-            var key = e.Key.ToString();
+            string key = e.Key.ToString();
             ProcessKeybindText(key);
         }
 
@@ -60,10 +60,9 @@ namespace FishingFun
         {
             if (!string.IsNullOrEmpty(key))
             {
-                ConsoleKey ck;
-                if (Enum.TryParse<ConsoleKey>(key, out ck))
+                if (Enum.TryParse<ConsoleKey>(key, out ConsoleKey ck))
                 {
-                    this.CastKey = ck;
+                    CastKey = ck;
                     WriteConfiguration();
                     CastKeyChanged?.Invoke(this, null);
                     return;

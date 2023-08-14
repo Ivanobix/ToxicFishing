@@ -11,13 +11,7 @@ namespace FishingFun
         public Stopwatch stopwatch = new Stopwatch();
         public Stopwatch maxTime = new Stopwatch();
 
-        public int ElapsedSecs
-        {
-            get
-            {
-                return (int)maxTime.Elapsed.TotalSeconds;
-            }
-        }
+        public int ElapsedSecs => (int)maxTime.Elapsed.TotalSeconds;
 
         public TimedAction(Action<TimedAction> action, int actionTimeoutMs, int maxTimeSecs)
         {

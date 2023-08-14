@@ -14,12 +14,12 @@ namespace FishingFun
         public static ILog logger = LogManager.GetLogger("Fishbot");
 
         private ConsoleKey castKey;
-        private List<ConsoleKey> tenMinKey;
-        private IBobberFinder bobberFinder;
-        private IBiteWatcher biteWatcher;
+        private readonly List<ConsoleKey> tenMinKey;
+        private readonly IBobberFinder bobberFinder;
+        private readonly IBiteWatcher biteWatcher;
         private bool isEnabled;
-        private Stopwatch stopwatch = new Stopwatch();
-        private static Random random = new Random();
+        private readonly Stopwatch stopwatch = new Stopwatch();
+        private static readonly Random random = new Random();
 
         public event EventHandler<FishingEvent> FishingEventHandler;
 
@@ -80,7 +80,7 @@ namespace FishingFun
             stopwatch.Start();
             while (stopwatch.ElapsedMilliseconds < milliseconds)
             {
-                bobberFinder.Find();
+                _ = bobberFinder.Find();
             }
             stopwatch.Stop();
         }
@@ -95,25 +95,25 @@ namespace FishingFun
         {
             bobberFinder.Reset();
 
-            var bobberPosition = FindBobber();
+            Point bobberPosition = FindBobber();
             if (bobberPosition == Point.Empty)
             {
                 return;
             }
 
-            this.biteWatcher.Reset(bobberPosition);
+            biteWatcher.Reset(bobberPosition);
 
             logger.Info("Bobber start position: " + bobberPosition);
 
-            var timedTask = new TimedAction((a) => { logger.Info("Fishing timed out!"); }, 25 * 1000, 25);
+            TimedAction timedTask = new TimedAction((a) => { logger.Info("Fishing timed out!"); }, 25 * 1000, 25);
 
             // Wait for the bobber to move
             while (isEnabled)
             {
-                var currentBobberPosition = FindBobber();
+                Point currentBobberPosition = FindBobber();
                 if (currentBobberPosition == Point.Empty || currentBobberPosition.X == 0) { return; }
 
-                if (this.biteWatcher.IsBite(currentBobberPosition))
+                if (biteWatcher.IsBite(currentBobberPosition))
                 {
                     Loot(bobberPosition);
                     PressTenMinKeyIfDue();
@@ -154,7 +154,7 @@ namespace FishingFun
 
             FishingEventHandler?.Invoke(this, new FishingEvent { Action = FishingAction.Cast });
 
-            foreach (var key in tenMinKey)
+            foreach (ConsoleKey key in tenMinKey)
             {
                 logger.Info($"Ten Minute Key: Pressing key {key} to run a macro, delete junk fish or apply a lure etc.");
                 WowProcess.PressKey(key);
@@ -169,7 +169,7 @@ namespace FishingFun
 
         public static void Sleep(int ms)
         {
-            ms+=random.Next(0, 225);
+            ms += random.Next(0, 225);
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -183,27 +183,23 @@ namespace FishingFun
         public static void FlushBuffers()
         {
             ILog log = LogManager.GetLogger("Fishbot");
-            var logger = log.Logger as Logger;
-            if (logger != null)
+            if (log.Logger is Logger logger)
             {
                 foreach (IAppender appender in logger.Appenders)
                 {
-                    var buffered = appender as BufferingAppenderSkeleton;
-                    if (buffered != null)
-                    {
-                        buffered.Flush();
-                    }
+                    BufferingAppenderSkeleton buffered = appender as BufferingAppenderSkeleton;
+                    buffered?.Flush();
                 }
             }
         }
 
         private Point FindBobber()
         {
-            var timer = new TimedAction((a) => { logger.Info("Waited seconds for target: " + a.ElapsedSecs); }, 1000, 5);
+            TimedAction timer = new TimedAction((a) => { logger.Info("Waited seconds for target: " + a.ElapsedSecs); }, 1000, 5);
 
             while (true)
             {
-                var target = this.bobberFinder.Find();
+                Point target = bobberFinder.Find();
                 if (target != Point.Empty || !timer.ExecuteIfDue()) { return target; }
             }
         }

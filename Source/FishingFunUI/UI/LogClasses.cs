@@ -10,10 +10,7 @@ namespace FishingFun
     {
         public DateTime DateTime { get; set; }
 
-        public string Time
-        {
-            get { return DateTime.ToLongTimeString(); }
-        }
+        public string Time => DateTime.ToLongTimeString();
 
         public int Index { get; set; }
 
@@ -31,12 +28,11 @@ namespace FishingFun
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
-            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            _ = Application.Current.Dispatcher.BeginInvoke((Action)(() =>
             {
                 if (PropertyChanged != null)
                 {
-                    PropertyChangedEventHandler handler = PropertyChanged;
-                    if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
                 }
             }));
         }

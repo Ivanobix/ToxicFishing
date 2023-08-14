@@ -5,7 +5,7 @@ namespace FishingFun
 {
     public class BobberColourPointFinder : IBobberFinder, IImageProvider
     {
-        private Color targetColor;
+        private readonly Color targetColor;
         private Bitmap bmp = new Bitmap(1, 1);
 
         public BobberColourPointFinder(Color targetColor)
@@ -18,23 +18,23 @@ namespace FishingFun
 
         public Point Find()
         {
-            this.bmp = WowScreen.GetBitmap();
+            bmp = WowScreen.GetBitmap();
 
             const int targetOffset = 15;
 
-            var widthLower = 0;
-            var widthHigher = bmp.Width;
-            var heightLower = 0;
-            var heightHigher = bmp.Height;
+            int widthLower = 0;
+            int widthHigher = bmp.Width;
+            int heightLower = 0;
+            int heightHigher = bmp.Height;
 
-            var targetRedLb = targetColor.R - targetOffset;
-            var targetRedHb = targetColor.R + targetOffset;
-            var targetBlueLb = targetColor.B - targetOffset;
-            var targetBlueHb = targetColor.B + targetOffset;
-            var targetGreenLb = targetColor.G - targetOffset;
-            var targetGreenHb = targetColor.G + targetOffset;
+            int targetRedLb = targetColor.R - targetOffset;
+            int targetRedHb = targetColor.R + targetOffset;
+            int targetBlueLb = targetColor.B - targetOffset;
+            int targetBlueHb = targetColor.B + targetOffset;
+            int targetGreenLb = targetColor.G - targetOffset;
+            int targetGreenHb = targetColor.G + targetOffset;
 
-            var pos = new Point(0, 0);
+            Point pos = new Point(0, 0);
 
             for (int i = widthLower; i < widthHigher; i++)
             {
@@ -42,7 +42,7 @@ namespace FishingFun
                 {
                     pos.X = i;
                     pos.Y = j;
-                    var colorAt = WowScreen.GetColorAt(pos, bmp);
+                    Color colorAt = WowScreen.GetColorAt(pos, bmp);
                     if (colorAt.R > targetRedLb &&
                         colorAt.R < targetRedHb &&
                         colorAt.B > targetBlueLb &&

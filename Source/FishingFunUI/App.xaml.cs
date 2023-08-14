@@ -7,7 +7,7 @@ namespace FishingFun
     {
         public App()
         {
-            log4net.Config.XmlConfigurator.Configure(new FileStream("log4net.config", FileMode.Open));
+            _ = log4net.Config.XmlConfigurator.Configure(new FileStream("log4net.config", FileMode.Open));
         }
     }
 }

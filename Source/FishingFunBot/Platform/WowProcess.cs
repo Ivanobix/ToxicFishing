@@ -6,9 +6,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-#nullable enable
 
-namespace FishingFun
+namespace FishingFunBot.Platform
 {
     public static class WowProcess
     {
@@ -30,15 +29,13 @@ namespace FishingFun
         //Get the wow-process, if success returns the process else null
         public static Process? Get(string name = "")
         {
-            List<string> names = string.IsNullOrEmpty(name) ? new List<string> { "Wow", "WowClassic", "Wow-64" } : new List<string> { name };
+            List<string> names = string.IsNullOrEmpty(name) ? new List<string> { "Wow", "WowClassic", "Wow-64", "felsong-64" } : new List<string> { name };
 
             Process[] processList = Process.GetProcesses();
             foreach (Process? p in processList)
             {
                 if (names.Select(s => s.ToLower()).Contains(p.ProcessName.ToLower()))
-                {
                     return p;
-                }
             }
 
             logger.Error($"Failed to find the wow process, tried: {string.Join(", ", names)}");
@@ -67,9 +64,7 @@ namespace FishingFun
             lastKey = key;
             Process? wowProcess = Get();
             if (wowProcess != null)
-            {
                 _ = PostMessage(wowProcess.MainWindowHandle, WM_KEYDOWN, (int)key, 0);
-            }
         }
 
         private static void KeyUp()
@@ -88,9 +83,7 @@ namespace FishingFun
         {
             Process? wowProcess = Get();
             if (wowProcess != null)
-            {
                 _ = PostMessage(wowProcess.MainWindowHandle, WM_KEYUP, (int)key, 0);
-            }
         }
 
         [DllImport("user32.dll")]
@@ -106,7 +99,7 @@ namespace FishingFun
         public static void RightClickMouse_Original(ILog logger, System.Drawing.Point position)
         {
             Process activeProcess = GetActiveProcess();
-            Process? wowProcess = WowProcess.Get();
+            Process? wowProcess = Get();
             if (wowProcess != null)
             {
                 System.Drawing.Point oldPosition = System.Windows.Forms.Cursor.Position;
@@ -129,7 +122,7 @@ namespace FishingFun
         public static void RightClickMouse()
         {
             _ = GetActiveProcess();
-            Process? wowProcess = WowProcess.Get();
+            Process? wowProcess = Get();
             if (wowProcess != null)
             {
                 _ = System.Windows.Forms.Cursor.Position;
@@ -142,7 +135,7 @@ namespace FishingFun
         public static void LeftClickMouse()
         {
             _ = GetActiveProcess();
-            Process? wowProcess = WowProcess.Get();
+            Process? wowProcess = Get();
             if (wowProcess != null)
             {
                 _ = System.Windows.Forms.Cursor.Position;
@@ -155,7 +148,7 @@ namespace FishingFun
         public static void RightClickMouse_LiamCooper(ILog logger, System.Drawing.Point position)
         {
             Process activeProcess = GetActiveProcess();
-            Process? wowProcess = WowProcess.Get();
+            Process? wowProcess = Get();
             if (wowProcess != null)
             {
                 mouse_event((int)MouseEventFlags.RightUp, position.X, position.Y, 0, 0);

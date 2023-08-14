@@ -1,4 +1,4 @@
-﻿namespace FishingFun
+﻿namespace FishingFunBot.Platform
 {
     public static class Keys
     {

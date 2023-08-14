@@ -1,12 +1,14 @@
-﻿using log4net;
+﻿using FishingFun;
+using FishingFunBot.Bot.Interfaces;
+using FishingFunBot.Platform;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 
-#nullable enable
-namespace FishingFun
+namespace FishingFunBot.Bot
 {
     public class SearchBobberFinder : IBobberFinder, IImageProvider
     {
@@ -45,9 +47,7 @@ namespace FishingFun
 
             previousLocation = Point.Empty;
             if (best != null)
-            {
                 previousLocation = best.point;
-            }
 
             BitmapEvent?.Invoke(this, new BobberBitmapEvent { Point = new Point(previousLocation.X, previousLocation.Y), Bitmap = bitmap });
 
@@ -132,7 +132,7 @@ namespace FishingFun
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("No red found");
+                    Debug.WriteLine("No red found");
                 }
 
                 return best;

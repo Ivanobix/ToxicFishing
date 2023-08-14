@@ -1,7 +1,9 @@
-﻿using System;
+﻿using FishingFunBot.Bot.Interfaces;
+using FishingFunBot.Platform;
+using System;
 using System.Drawing;
 
-namespace FishingFun
+namespace FishingFunBot.Bot
 {
     public class BobberColourPointFinder : IBobberFinder, IImageProvider
     {

@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace FishingFun
+namespace FishingFunBot.Platform
 {
     public static class WowScreen
     {

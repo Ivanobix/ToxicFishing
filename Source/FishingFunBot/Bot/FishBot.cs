@@ -1,4 +1,6 @@
-﻿using log4net;
+﻿using FishingFunBot.Bot.Interfaces;
+using FishingFunBot.Platform;
+using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
 using System;
@@ -7,7 +9,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
-namespace FishingFun
+namespace FishingFunBot.Bot
 {
     public class FishingBot
     {
@@ -97,9 +99,7 @@ namespace FishingFun
 
             Point bobberPosition = FindBobber();
             if (bobberPosition == Point.Empty)
-            {
                 return;
-            }
 
             biteWatcher.Reset(bobberPosition);
 
@@ -111,8 +111,7 @@ namespace FishingFun
             while (isEnabled)
             {
                 Point currentBobberPosition = FindBobber();
-                if (currentBobberPosition == Point.Empty || currentBobberPosition.X == 0) { return; }
-
+                if (currentBobberPosition == Point.Empty || currentBobberPosition.X == 0) return;
                 if (biteWatcher.IsBite(currentBobberPosition))
                 {
                     Loot(bobberPosition);
@@ -120,7 +119,7 @@ namespace FishingFun
                     return;
                 }
 
-                if (!timedTask.ExecuteIfDue()) { return; }
+                if (!timedTask.ExecuteIfDue()) return;
             }
         }
 
@@ -129,9 +128,7 @@ namespace FishingFun
         private void PressTenMinKeyIfDue()
         {
             if ((DateTime.Now - StartTime).TotalMinutes > 10 && tenMinKey.Count > 0)
-            {
                 DoTenMinuteKey();
-            }
         }
 
         /// <summary>
@@ -148,9 +145,7 @@ namespace FishingFun
             StartTime = DateTime.Now;
 
             if (tenMinKey.Count == 0)
-            {
                 logger.Info($"Ten Minute Key:  No keys defined in tenMinKey, so nothing to do (Define in call to FishingBot constructor).");
-            }
 
             FishingEventHandler?.Invoke(this, new FishingEvent { Action = FishingAction.Cast });
 
@@ -161,10 +156,12 @@ namespace FishingFun
             }
         }
 
-        private void Loot(Point bobberPosition)
+        private static void Loot(Point bobberPosition)
         {
             logger.Info($"Right clicking mouse to Loot.");
             WowProcess.RightClickMouse(logger, bobberPosition);
+            logger.Info($"Trying to accept souldbound loot.");
+            WowProcess.PressKey(ConsoleKey.D6); // Loot souldbound objects (requires manual action)
         }
 
         public static void Sleep(int ms)
@@ -187,7 +184,7 @@ namespace FishingFun
             {
                 foreach (IAppender appender in logger.Appenders)
                 {
-                    BufferingAppenderSkeleton buffered = appender as BufferingAppenderSkeleton;
+                    BufferingAppenderSkeleton? buffered = appender as BufferingAppenderSkeleton;
                     buffered?.Flush();
                 }
             }
@@ -200,7 +197,7 @@ namespace FishingFun
             while (true)
             {
                 Point target = bobberFinder.Find();
-                if (target != Point.Empty || !timer.ExecuteIfDue()) { return target; }
+                if (target != Point.Empty || !timer.ExecuteIfDue()) return target;
             }
         }
     }

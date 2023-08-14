@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace FishingFun
+namespace FishingFunBot.Platform
 {
     public class TimedAction
     {

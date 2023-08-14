@@ -1,4 +1,6 @@
-﻿namespace FishingFun
+﻿using FishingFun;
+
+namespace FishingFunBot.Bot.Interfaces
 {
     public interface IPixelClassifier
     {

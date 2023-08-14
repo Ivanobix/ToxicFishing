@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 
-namespace FishingFun
+namespace FishingFunBot.Bot.Interfaces
 {
     public interface IImageProvider
     {

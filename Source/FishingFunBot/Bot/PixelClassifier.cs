@@ -1,4 +1,5 @@
-﻿using log4net;
+﻿using FishingFunBot.Bot.Interfaces;
+using log4net;
 using System;
 
 namespace FishingFun

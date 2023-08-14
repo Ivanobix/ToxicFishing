@@ -1,4 +1,6 @@
 ﻿using FishingFun;
+using FishingFunBot.Bot;
+using FishingFunBot.Platform;
 using log4net;
 using System;
 using System.Collections.Generic;

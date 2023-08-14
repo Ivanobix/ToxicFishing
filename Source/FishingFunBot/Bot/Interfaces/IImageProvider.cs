@@ -16,7 +16,6 @@ namespace FishingFunBot.Bot.Interfaces
 
     public enum FishingAction
     {
-        BobberMove,
         Reset,
         Loot,
         Cast
@@ -29,7 +28,7 @@ namespace FishingFunBot.Bot.Interfaces
 
         public override string ToString()
         {
-            return Action.ToString() + (Action == FishingAction.BobberMove ? " " + Amplitude : "");
+            return Action.ToString();
         }
     }
 }

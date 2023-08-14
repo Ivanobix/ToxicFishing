@@ -14,7 +14,6 @@ namespace FishingFunBot.Bot
         private List<int> yPositions = new List<int>();
         private readonly int strikeValue;
         private int yDiff;
-        private TimedAction? timer;
 
         public Action<FishingEvent> FishingEventHandler { set; get; } = (e) => { };
 
@@ -36,10 +35,6 @@ namespace FishingFunBot.Bot
             {
                 InitialBobberPosition.Y
             };
-            timer = new TimedAction((a) =>
-            {
-                RaiseEvent(new FishingEvent { Amplitude = yDiff, Action = FishingAction.BobberMove });
-            }, 500, 25);
         }
 
         public bool IsBite(Point currentBobberPosition)
@@ -54,12 +49,9 @@ namespace FishingFunBot.Bot
 
             bool thresholdReached = yDiff <= -strikeValue;
 
-            _ = (timer?.ExecuteIfDue());
-
             if (thresholdReached)
             {
                 RaiseEvent(new FishingEvent { Action = FishingAction.Loot });
-                timer?.ExecuteNow();
                 return true;
             }
 

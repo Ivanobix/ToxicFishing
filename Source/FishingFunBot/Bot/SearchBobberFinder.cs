@@ -13,19 +13,16 @@ namespace FishingFunBot.Bot
     public class SearchBobberFinder : IBobberFinder, IImageProvider
     {
         private readonly IPixelClassifier pixelClassifier;
-
         private static readonly ILog logger = LogManager.GetLogger("Fishbot");
 
         private Point previousLocation;
+        private Bitmap bitmap;
 
-        private Bitmap bitmap = new Bitmap(1, 1);
-
-        public event EventHandler<BobberBitmapEvent> BitmapEvent;
+        public event EventHandler<BobberBitmapEvent> BitmapEvent = delegate { };
 
         public SearchBobberFinder(IPixelClassifier pixelClassifier)
         {
             this.pixelClassifier = pixelClassifier;
-            BitmapEvent += (s, e) => { };
         }
 
         public void Reset()
@@ -35,25 +32,24 @@ namespace FishingFunBot.Bot
 
         public Point Find()
         {
-            bitmap = WowScreen.GetBitmap();
-
-            Score? best = Score.ScorePoints(FindRedPoints());
-
-            if (previousLocation != Point.Empty && best == null)
+            using (bitmap = WowScreen.GetBitmap())
             {
-                previousLocation = Point.Empty;
-                best = Score.ScorePoints(FindRedPoints());
+                var bestScore = ScorePoints(FindRedPoints());
+
+                if (previousLocation != Point.Empty && bestScore == null)
+                {
+                    previousLocation = Point.Empty;
+                    bestScore = ScorePoints(FindRedPoints());
+                }
+
+                var returnPoint = previousLocation == Point.Empty 
+                                  ? Point.Empty 
+                                  : WowScreen.GetScreenPositionFromBitmapPostion(previousLocation);
+
+                BitmapEvent.Invoke(this, new BobberBitmapEvent { Point = previousLocation, Bitmap = bitmap });
+
+                return returnPoint;
             }
-
-            previousLocation = Point.Empty;
-            if (best != null)
-                previousLocation = best.point;
-
-            BitmapEvent?.Invoke(this, new BobberBitmapEvent { Point = new Point(previousLocation.X, previousLocation.Y), Bitmap = bitmap });
-
-            bitmap.Dispose();
-
-            return previousLocation == Point.Empty ? Point.Empty : WowScreen.GetScreenPositionFromBitmapPostion(previousLocation);
         }
 
         private List<Score> FindRedPoints()
@@ -61,17 +57,12 @@ namespace FishingFunBot.Bot
             List<Score> points = new List<Score>();
 
             bool hasPreviousLocation = previousLocation != Point.Empty;
-
-            // search around last found location
             int minX = Math.Max(hasPreviousLocation ? previousLocation.X - 40 : 0, 0);
             int maxX = Math.Min(hasPreviousLocation ? previousLocation.X + 40 : bitmap.Width, bitmap.Width);
             int minY = Math.Max(hasPreviousLocation ? previousLocation.Y - 40 : 0, 0);
             int maxY = Math.Min(hasPreviousLocation ? previousLocation.Y + 40 : bitmap.Height, bitmap.Height);
 
-            //System.Diagnostics.Debug.WriteLine($"Search from X {minX}-{maxX}, Y {minY}-{maxY}");
-
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            Stopwatch sw = Stopwatch.StartNew();
 
             for (int x = minX; x < maxX; x++)
             {
@@ -80,6 +71,7 @@ namespace FishingFunBot.Bot
                     ProcessPixel(points, x, y);
                 }
             }
+
             sw.Stop();
 
             if (sw.ElapsedMilliseconds > 200)
@@ -101,42 +93,42 @@ namespace FishingFunBot.Bot
         {
             Color p = bitmap.GetPixel(x, y);
 
-            bool isMatch = pixelClassifier.IsMatch(p.R, p.G, p.B);
-
-            if (isMatch)
+            if (pixelClassifier.IsMatch(p.R, p.G, p.B))
             {
                 points.Add(new Score { point = new Point(x, y) });
                 bitmap.SetPixel(x, y, pixelClassifier.Mode == PixelClassifier.ClassifierMode.Blue ? Color.Blue : Color.Red);
             }
         }
 
+        private Score? ScorePoints(List<Score> points)
+        {
+            foreach (Score p in points)
+            {
+                p.count = points.Count(s => Math.Abs(s.point.X - p.point.X) < 10 &&
+                                            Math.Abs(s.point.Y - p.point.Y) < 10);
+            }
+
+            Score? best = points.OrderByDescending(s => s.count).FirstOrDefault();
+
+            if (best != null)
+            {
+                // Uncomment if needed.
+                // Debug.WriteLine($"best score: {best.count} at {best.point.X},{best.point.Y}");
+            }
+            else
+            {
+                Debug.WriteLine("No red found");
+            }
+
+            previousLocation = best?.point ?? Point.Empty;
+
+            return best;
+        }
+
         private class Score
         {
             public Point point;
             public int count = 0;
-
-            public static Score? ScorePoints(List<Score> points)
-            {
-                foreach (Score p in points)
-                {
-                    p.count = points.Where(s => Math.Abs(s.point.X - p.point.X) < 10) // + or - 10 pixels horizontally
-                        .Where(s => Math.Abs(s.point.Y - p.point.Y) < 10) // + or - 10 pixels vertically
-                        .Count();
-                }
-
-                Score? best = points.OrderByDescending(s => s.count).FirstOrDefault();
-
-                if (best != null)
-                {
-                    //System.Diagnostics.Debug.WriteLine($"best score: {best.count} at {best.point.X},{best.point.Y}");
-                }
-                else
-                {
-                    Debug.WriteLine("No red found");
-                }
-
-                return best;
-            }
         }
     }
 }

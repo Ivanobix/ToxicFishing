@@ -1,4 +1,4 @@
-﻿using FishingFun;
+﻿using ToxicFishing;
 using log4net;
 using log4net.Config;
 using ToxicFishing.Bot;

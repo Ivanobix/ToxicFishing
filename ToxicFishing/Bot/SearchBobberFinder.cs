@@ -1,5 +1,4 @@
-﻿using FishingFun;
-using log4net;
+﻿using log4net;
 using System.Diagnostics;
 using ToxicFishing.Events;
 using ToxicFishing.Platform;

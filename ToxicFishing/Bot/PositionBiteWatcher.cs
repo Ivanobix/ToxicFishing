@@ -4,7 +4,7 @@ namespace ToxicFishing.Bot
 {
     public class PositionBiteWatcher
     {
-        private List<int> yPositions = new();
+        private SortedSet<int> yPositions = new();
         private readonly int strikeValue;
         private int yDiff;
 
@@ -24,21 +24,23 @@ namespace ToxicFishing.Bot
         {
             RaiseEvent(new FishingEvent { Action = FishingAction.Reset });
 
-            yPositions = new List<int>
-            {
-                InitialBobberPosition.Y
-            };
+            yPositions.Clear();
+            yPositions.Add(InitialBobberPosition.Y);
         }
 
         public bool IsBite(Point currentBobberPosition)
         {
-            if (!yPositions.Contains(currentBobberPosition.Y))
-            {
-                yPositions.Add(currentBobberPosition.Y);
-                yPositions.Sort();
-            }
+            yPositions.Add(currentBobberPosition.Y);
 
-            yDiff = yPositions[(int)((yPositions.Count + 0.5) / 2)] - currentBobberPosition.Y;
+            int medianPosition;
+            if (yPositions.Count % 2 == 0)
+                medianPosition = yPositions.Count / 2 - 1;  // For even lengths
+            else
+                medianPosition = yPositions.Count / 2;      // For odd lengths
+
+            int medianValue = yPositions.ElementAt(medianPosition);
+            
+            yDiff = medianValue - currentBobberPosition.Y;
 
             bool thresholdReached = yDiff <= -strikeValue;
 

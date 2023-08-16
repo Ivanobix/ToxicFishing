@@ -4,38 +4,34 @@ namespace ToxicFishing.Platform
 {
     public class TimedAction
     {
-        public int actionTimeoutMs;
-        public int maxTimeSecs;
-        public Action<TimedAction> action;
-        public Stopwatch stopwatch = new();
-        public Stopwatch maxTime = new();
+        private readonly Action<TimedAction> action;
+        private readonly Stopwatch stopwatch = new();
+        private readonly Stopwatch maxTime = new();
+        public int ActionTimeoutMs { get; }
+        public int MaxTimeSecs { get; }
 
         public int ElapsedSecs => (int)maxTime.Elapsed.TotalSeconds;
 
         public TimedAction(Action<TimedAction> action, int actionTimeoutMs, int maxTimeSecs)
         {
-            this.action = action;
-            this.actionTimeoutMs = actionTimeoutMs;
-            this.maxTimeSecs = maxTimeSecs;
+            this.action = action ?? throw new ArgumentNullException(nameof(action));
+            this.ActionTimeoutMs = actionTimeoutMs;
+            this.MaxTimeSecs = maxTimeSecs;
             stopwatch.Start();
             maxTime.Start();
         }
 
-        public void ExecuteNow()
-        {
-            action(this);
-        }
+        public void ExecuteNow() => action(this);
 
         public bool ExecuteIfDue()
         {
-            if (stopwatch.Elapsed.TotalMilliseconds > actionTimeoutMs)
+            if (stopwatch.Elapsed.TotalMilliseconds > ActionTimeoutMs)
             {
                 action(this);
-                stopwatch.Reset();
-                stopwatch.Start();
+                stopwatch.Restart();
             }
 
-            return maxTime.Elapsed.TotalSeconds < maxTimeSecs;
+            return ElapsedSecs < MaxTimeSecs;
         }
     }
 }

@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
-
 namespace ToxicFishing.Platform
 {
     public static class WowProcess
@@ -14,27 +13,35 @@ namespace ToxicFishing.Platform
         private static readonly Random random = new();
         private static readonly int LootDelay = 2000;
 
+        private static Process? cachedWowProcess;
 
         public static bool IsWowClassic()
         {
-            Process? wowProcess = Get();
-            return wowProcess != null && wowProcess.ProcessName.ToLower().Contains("classic"); ;
+            Process? wowProcess = GetWowProcess();
+            return wowProcess?.ProcessName.Contains("classic", StringComparison.OrdinalIgnoreCase) ?? false;
         }
 
-        //Get the wow-process, if success returns the process else null
-        public static Process? Get(string name = "")
+        public static Process? GetWowProcess(string name = "")
         {
-            List<string> names = string.IsNullOrEmpty(name) ? new List<string> { "Wow", "WowClassic", "Wow-64", "felsong-64" } : new List<string> { name };
-
-            Process[] processList = Process.GetProcesses();
-            foreach (Process? p in processList)
+            if (cachedWowProcess != null && !cachedWowProcess.HasExited)
             {
-                if (names.Select(s => s.ToLower()).Contains(p.ProcessName.ToLower()))
+                return cachedWowProcess;
+            }
+
+            var names = string.IsNullOrEmpty(name) 
+                ? new[] { "Wow", "WowClassic", "Wow-64", "felsong-64" } 
+                : new[] { name };
+
+            foreach (Process p in Process.GetProcesses())
+            {
+                if (names.Any(s => s.Equals(p.ProcessName, StringComparison.OrdinalIgnoreCase)))
+                {
+                    cachedWowProcess = p;
                     return p;
+                }
             }
 
             logger.Error($"Failed to find the wow process, tried: {string.Join(", ", names)}");
-
             return null;
         }
 
@@ -50,29 +57,22 @@ namespace ToxicFishing.Platform
         private static Process GetActiveProcess()
         {
             IntPtr hwnd = GetForegroundWindow();
-            _ = GetWindowThreadProcessId(hwnd, out uint pid);
+            GetWindowThreadProcessId(hwnd, out uint pid);
             return Process.GetProcessById((int)pid);
-        }
-
-        private static void KeyDown(ConsoleKey key)
-        {
-            Process? wowProcess = Get();
-            if (wowProcess != null)
-                _ = PostMessage(wowProcess.MainWindowHandle, WM_KEYDOWN, (int)key, 0);
         }
 
         public static void PressKey(ConsoleKey key)
         {
-            KeyDown(key);
+            SendKeyMessage(key, WM_KEYDOWN);
             Thread.Sleep(50 + random.Next(0, 75));
-            KeyUp(key);
+            SendKeyMessage(key, WM_KEYUP);
         }
 
-        public static void KeyUp(ConsoleKey key)
+        private static void SendKeyMessage(ConsoleKey key, uint message)
         {
-            Process? wowProcess = Get();
+            Process? wowProcess = GetWowProcess();
             if (wowProcess != null)
-                _ = PostMessage(wowProcess.MainWindowHandle, WM_KEYUP, (int)key, 0);
+                PostMessage(wowProcess.MainWindowHandle, message, (int)key, 0);
         }
 
         [DllImport("user32.dll")]
@@ -87,7 +87,7 @@ namespace ToxicFishing.Platform
         public static void RightClickMouse_LiamCooper(ILog logger, Point position)
         {
             Process activeProcess = GetActiveProcess();
-            Process? wowProcess = Get();
+            Process? wowProcess = GetWowProcess();
             if (wowProcess != null)
             {
                 mouse_event((int)MouseEventFlags.RightUp, position.X, position.Y, 0, 0);
@@ -95,11 +95,14 @@ namespace ToxicFishing.Platform
 
                 Thread.Sleep(200);
                 Cursor.Position = position;
+
                 Thread.Sleep(LootDelay);
                 mouse_event((int)MouseEventFlags.RightDown, position.X, position.Y, 0, 0);
+
                 Thread.Sleep(30 + random.Next(0, 47));
                 mouse_event((int)MouseEventFlags.RightUp, position.X, position.Y, 0, 0);
                 RefocusOnOldScreen(logger, activeProcess, wowProcess, oldPosition);
+
                 Thread.Sleep(LootDelay / 2);
             }
         }
@@ -110,13 +113,13 @@ namespace ToxicFishing.Platform
             {
                 if (activeProcess.MainWindowTitle != wowProcess.MainWindowTitle)
                 {
-                    _ = PostMessage(activeProcess.MainWindowHandle, Keys.WM_RBUTTONDOWN, Keys.VK_RMB, 0);
+                    PostMessage(activeProcess.MainWindowHandle, Keys.WM_RBUTTONDOWN, Keys.VK_RMB, 0);
                     Thread.Sleep(30);
-                    _ = PostMessage(activeProcess.MainWindowHandle, Keys.WM_RBUTTONUP, Keys.VK_RMB, 0);
+                    PostMessage(activeProcess.MainWindowHandle, Keys.WM_RBUTTONUP, Keys.VK_RMB, 0);
 
-                    KeyDown(ConsoleKey.Escape);
+                    SendKeyMessage(ConsoleKey.Escape, WM_KEYDOWN);
                     Thread.Sleep(30);
-                    KeyUp(ConsoleKey.Escape);
+                    SendKeyMessage(ConsoleKey.Escape, WM_KEYUP);
 
                     Cursor.Position = oldPosition;
                 }

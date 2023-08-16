@@ -2,23 +2,27 @@
 {
     public static class WowScreen
     {
-        public static Color GetColorAt(Point pos, Bitmap bmp)
-        {
-            return bmp.GetPixel(pos.X, pos.Y);
-        }
+        private static readonly int ScreenWidthDivided = Screen.PrimaryScreen.Bounds.Width / 4;
+        private static readonly int ScreenHeightDivided = Screen.PrimaryScreen.Bounds.Height / 4;
 
         public static Bitmap GetBitmap()
         {
-            Bitmap bmpScreen = new(Screen.PrimaryScreen.Bounds.Width / 2, (Screen.PrimaryScreen.Bounds.Height / 2) - 100);
-            Graphics graphics = Graphics.FromImage(bmpScreen);
-            graphics.CopyFromScreen(Screen.PrimaryScreen.Bounds.Width / 4, Screen.PrimaryScreen.Bounds.Height / 4, 0, 0, bmpScreen.Size);
-            graphics.Dispose();
+            int width = Screen.PrimaryScreen.Bounds.Width / 2;
+            int height = (Screen.PrimaryScreen.Bounds.Height / 2) - 100;
+
+            Bitmap bmpScreen = new(width, height);
+            
+            using (Graphics graphics = Graphics.FromImage(bmpScreen))
+            {
+                graphics.CopyFromScreen(ScreenWidthDivided, ScreenHeightDivided, 0, 0, bmpScreen.Size);
+            }
+            
             return bmpScreen;
         }
 
         public static Point GetScreenPositionFromBitmapPostion(Point pos)
         {
-            return new Point(pos.X += Screen.PrimaryScreen.Bounds.Width / 4, pos.Y += Screen.PrimaryScreen.Bounds.Height / 4);
+            return new Point(pos.X + ScreenWidthDivided, pos.Y + ScreenHeightDivided);
         }
     }
 }

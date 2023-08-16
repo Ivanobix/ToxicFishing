@@ -7,7 +7,7 @@ namespace ToxicFishing.Bot
 {
     public class FishingBot
     {
-        public static readonly ILog logger = LogManager.GetLogger("Fishbot");
+        private static readonly ILog logger = LogManager.GetLogger("Fishbot");
         private static readonly Random random = new();
 
         private readonly SearchBobberFinder bobberFinder;
@@ -16,16 +16,18 @@ namespace ToxicFishing.Bot
         private readonly List<ConsoleKey> tenMinKey;
         private readonly Stopwatch stopwatch = new();
 
-        private DateTime StartTime = DateTime.Now;
+        private DateTime StartTime;
 
         public event EventHandler<FishingEvent> FishingEventHandler = (s, e) => { };
 
         public FishingBot(SearchBobberFinder bobberFinder, PositionBiteWatcher biteWatcher, ConsoleKey castKey, List<ConsoleKey> tenMinKey)
         {
-            this.bobberFinder = bobberFinder;
-            this.biteWatcher = biteWatcher;
+            this.bobberFinder = bobberFinder ?? throw new ArgumentNullException(nameof(bobberFinder));
+            this.biteWatcher = biteWatcher ?? throw new ArgumentNullException(nameof(biteWatcher));
             this.castKey = castKey;
-            this.tenMinKey = tenMinKey;
+            this.tenMinKey = tenMinKey ?? new List<ConsoleKey>();
+
+            StartTime = DateTime.Now;
         }
 
         public async Task StartAsync()
@@ -39,7 +41,9 @@ namespace ToxicFishing.Bot
                 {
                     PressTenMinKeyIfDue();
                     InvokeFishingEvent(FishingAction.Cast);
+
                     WowProcess.PressKey(castKey);
+
                     await WatchAsync(2000);
                     await WaitForBiteAsync();
                 }
@@ -57,10 +61,9 @@ namespace ToxicFishing.Bot
             stopwatch.Restart();
 
             while (stopwatch.ElapsedMilliseconds < milliseconds)
-                _ = bobberFinder.Find();
+                bobberFinder.Find();
 
             await Task.Delay(milliseconds);
-
             stopwatch.Stop();
         }
 
@@ -93,7 +96,7 @@ namespace ToxicFishing.Bot
                 if (!timedTask.ExecuteIfDue())
                     return;
 
-                await Task.Delay(100); // Agregamos un pequeño retraso para no saturar el bucle
+                await Task.Delay(100); // Adding a small delay to not saturate the loop
             }
         }
 
@@ -126,14 +129,14 @@ namespace ToxicFishing.Bot
         {
             logger.Info("Right clicking mouse to Loot.");
             WowProcess.RightClickMouse(logger, bobberPosition);
-            logger.Info("Trying to accept souldbound loot.");
+
+            logger.Info("Trying to accept soulbound loot.");
             WowProcess.PressKey(ConsoleKey.D6);
         }
 
         private static async Task SleepAsync(int ms)
         {
-            ms += random.Next(0, 225);
-            await Task.Delay(ms);
+            await Task.Delay(ms + random.Next(0, 225));
         }
 
         private void InvokeFishingEvent(FishingAction action)

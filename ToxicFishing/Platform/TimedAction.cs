@@ -15,13 +15,16 @@ namespace ToxicFishing.Platform
         public TimedAction(Action<TimedAction> action, int actionTimeoutMs, int maxTimeSecs)
         {
             this.action = action ?? throw new ArgumentNullException(nameof(action));
-            this.ActionTimeoutMs = actionTimeoutMs;
-            this.MaxTimeSecs = maxTimeSecs;
+            ActionTimeoutMs = actionTimeoutMs;
+            MaxTimeSecs = maxTimeSecs;
             stopwatch.Start();
             maxTime.Start();
         }
 
-        public void ExecuteNow() => action(this);
+        public void ExecuteNow()
+        {
+            action(this);
+        }
 
         public bool ExecuteIfDue()
         {

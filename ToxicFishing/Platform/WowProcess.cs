@@ -28,8 +28,8 @@ namespace ToxicFishing.Platform
                 return cachedWowProcess;
             }
 
-            var names = string.IsNullOrEmpty(name) 
-                ? new[] { "Wow", "WowClassic", "Wow-64", "felsong-64" } 
+            var names = string.IsNullOrEmpty(name)
+                ? new[] { "Wow", "WowClassic", "Wow-64", "felsong-64" }
                 : new[] { name };
 
             foreach (Process p in Process.GetProcesses())

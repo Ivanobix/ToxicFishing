@@ -34,12 +34,12 @@ namespace ToxicFishing.Bot
 
             int medianPosition;
             if (yPositions.Count % 2 == 0)
-                medianPosition = yPositions.Count / 2 - 1;  // For even lengths
+                medianPosition = (yPositions.Count / 2) - 1;  // For even lengths
             else
                 medianPosition = yPositions.Count / 2;      // For odd lengths
 
             int medianValue = yPositions.ElementAt(medianPosition);
-            
+
             yDiff = medianValue - currentBobberPosition.Y;
 
             bool thresholdReached = yDiff <= -strikeValue;

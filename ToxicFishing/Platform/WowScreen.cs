@@ -11,12 +11,12 @@
             int height = (Screen.PrimaryScreen.Bounds.Height / 2) - 100;
 
             Bitmap bmpScreen = new(width, height);
-            
+
             using (Graphics graphics = Graphics.FromImage(bmpScreen))
             {
                 graphics.CopyFromScreen(ScreenWidthDivided, ScreenHeightDivided, 0, 0, bmpScreen.Size);
             }
-            
+
             return bmpScreen;
         }
 

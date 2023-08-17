@@ -45,7 +45,7 @@ namespace ToxicFishing.Bot
 
                 BitmapEvent?.Invoke(this, new BobberBitmapEvent { Point = Point.Empty, Bitmap = bmp });
             }
-            
+
             return Point.Empty;
         }
     }

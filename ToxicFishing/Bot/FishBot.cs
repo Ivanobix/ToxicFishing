@@ -1,5 +1,4 @@
-﻿using log4net;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ToxicFishing.Events;
 using ToxicFishing.Platform;
 
@@ -7,7 +6,6 @@ namespace ToxicFishing.Bot
 {
     public class FishingBot
     {
-        private static readonly ILog logger = LogManager.GetLogger("Fishbot");
         private static readonly Random random = new();
 
         private readonly SearchBobberFinder bobberFinder;
@@ -49,7 +47,7 @@ namespace ToxicFishing.Bot
                 }
                 catch (Exception e)
                 {
-                    logger.Error(e.ToString());
+                    Console.WriteLine(e.ToString());
                     await SleepAsync(2000);
                 }
             }
@@ -76,8 +74,8 @@ namespace ToxicFishing.Bot
                 return;
 
             biteWatcher.Reset(bobberPosition);
-            logger.Info($"Bobber start position: {bobberPosition}");
-            TimedAction timedTask = new((a) => { logger.Info("Fishing timed out!"); }, 25_000, 25);
+            Console.WriteLine($"Bobber start position: {bobberPosition}");
+            TimedAction timedTask = new((a) => { Console.WriteLine("Fishing timed out!"); }, 25_000, 25);
 
             while (true)
             {
@@ -112,7 +110,7 @@ namespace ToxicFishing.Bot
 
             if (!tenMinKey.Any())
             {
-                logger.Info("Ten Minute Key: No keys defined in tenMinKey, so nothing to do (Define in call to FishingBot constructor).");
+                Console.WriteLine("Ten Minute Key: No keys defined in tenMinKey, so nothing to do (Define in call to FishingBot constructor).");
                 return;
             }
 
@@ -120,17 +118,17 @@ namespace ToxicFishing.Bot
 
             foreach (ConsoleKey key in tenMinKey)
             {
-                logger.Info($"Ten Minute Key: Pressing key {key} to run a macro, delete junk fish or apply a lure etc.");
+                Console.WriteLine($"Ten Minute Key: Pressing key {key} to run a macro, delete junk fish or apply a lure etc.");
                 WowProcess.PressKey(key);
             }
         }
 
         private static void Loot(Point bobberPosition)
         {
-            logger.Info("Right clicking mouse to Loot.");
-            WowProcess.RightClickMouse(logger, bobberPosition);
+            Console.WriteLine("Right clicking mouse to Loot.");
+            WowProcess.RightClickMouse(bobberPosition);
 
-            logger.Info("Trying to accept soulbound loot.");
+            Console.WriteLine("Trying to accept soulbound loot.");
             WowProcess.PressKey(ConsoleKey.D6);
         }
 

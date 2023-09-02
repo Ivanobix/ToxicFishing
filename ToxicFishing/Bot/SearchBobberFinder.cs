@@ -1,5 +1,4 @@
-﻿using log4net;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ToxicFishing.Events;
 using ToxicFishing.Platform;
 
@@ -8,7 +7,6 @@ namespace ToxicFishing.Bot
     public class SearchBobberFinder
     {
         private readonly PixelClassifier pixelClassifier;
-        private static readonly ILog logger = LogManager.GetLogger("Fishbot");
 
         private Point previousLocation;
         private Bitmap? bitmap;
@@ -77,7 +75,7 @@ namespace ToxicFishing.Bot
 
             if (points.Count > 1000)
             {
-                logger.Error("Error: Too much of the feather colour in this image, please adjust the colour configuration !");
+                Console.WriteLine("Error: Too much of the feather colour in this image, please adjust the colour configuration !");
                 points.Clear();
             }
 

@@ -1,13 +1,10 @@
-﻿using log4net;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace ToxicFishing.Platform
 {
     public static class WowProcess
     {
-        public static readonly ILog logger = LogManager.GetLogger("Fishbot");
-
         private const uint WM_KEYDOWN = 0x0100;
         private const uint WM_KEYUP = 0x0101;
         private static readonly Random random = new();
@@ -24,25 +21,18 @@ namespace ToxicFishing.Platform
         public static Process? GetWowProcess(string name = "")
         {
             if (cachedWowProcess != null && !cachedWowProcess.HasExited)
-            {
                 return cachedWowProcess;
-            }
 
-            var names = string.IsNullOrEmpty(name)
-                ? new[] { "Wow", "WowClassic", "Wow-64", "felsong-64" }
+            string[] names = string.IsNullOrEmpty(name)
+                ? new[] { "wow", "wowclassic", "wow-64", "felsong-64" }
                 : new[] { name };
 
-            foreach (Process p in Process.GetProcesses())
-            {
-                if (names.Any(s => s.Equals(p.ProcessName, StringComparison.OrdinalIgnoreCase)))
-                {
-                    cachedWowProcess = p;
-                    return p;
-                }
-            }
+            cachedWowProcess = Process.GetProcesses().FirstOrDefault(x => names.Contains(x.ProcessName.ToLowerInvariant()));
+            
+            if (cachedWowProcess == null)
+                Console.WriteLine($"Failed to find the wow process, tried: {string.Join(", ", names)}");
 
-            logger.Error($"Failed to find the wow process, tried: {string.Join(", ", names)}");
-            return null;
+            return cachedWowProcess;
         }
 
         [DllImport("user32.dll")]
@@ -79,35 +69,35 @@ namespace ToxicFishing.Platform
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetCursorPos(int x, int y);
 
-        public static void RightClickMouse(ILog logger, Point position)
+        public static void RightClickMouse(Point position)
         {
-            RightClickMouse_LiamCooper(logger, position);
+            RightClickMouse_LiamCooper(position);
         }
 
-        public static void RightClickMouse_LiamCooper(ILog logger, Point position)
+        public static void RightClickMouse_LiamCooper(Point position)
         {
             Process activeProcess = GetActiveProcess();
             Process? wowProcess = GetWowProcess();
             if (wowProcess != null)
             {
-                mouse_event((int)MouseEventFlags.RightUp, position.X, position.Y, 0, 0);
+                mouse_event((int)MouseEvents.RightUp, position.X, position.Y, 0, 0);
                 Point oldPosition = Cursor.Position;
 
                 Thread.Sleep(200);
                 Cursor.Position = position;
 
                 Thread.Sleep(LootDelay);
-                mouse_event((int)MouseEventFlags.RightDown, position.X, position.Y, 0, 0);
+                mouse_event((int)MouseEvents.RightDown, position.X, position.Y, 0, 0);
 
                 Thread.Sleep(30 + random.Next(0, 47));
-                mouse_event((int)MouseEventFlags.RightUp, position.X, position.Y, 0, 0);
-                RefocusOnOldScreen(logger, activeProcess, wowProcess, oldPosition);
+                mouse_event((int)MouseEvents.RightUp, position.X, position.Y, 0, 0);
+                RefocusOnOldScreen(activeProcess, wowProcess, oldPosition);
 
                 Thread.Sleep(LootDelay / 2);
             }
         }
 
-        private static void RefocusOnOldScreen(ILog logger, Process activeProcess, Process wowProcess, Point oldPosition)
+        private static void RefocusOnOldScreen(Process activeProcess, Process wowProcess, Point oldPosition)
         {
             try
             {
@@ -126,7 +116,7 @@ namespace ToxicFishing.Platform
             }
             catch (Exception ex)
             {
-                logger.Error(ex.Message);
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -134,7 +124,7 @@ namespace ToxicFishing.Platform
         private static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
 
         [Flags]
-        public enum MouseEventFlags
+        public enum MouseEvents
         {
             LeftDown = 0x00000002,
             LeftUp = 0x00000004,

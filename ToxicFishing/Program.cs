@@ -1,10 +1,6 @@
-﻿using log4net;
-using log4net.Config;
-using ToxicFishing;
+﻿using ToxicFishing;
 using ToxicFishing.Bot;
 using ToxicFishing.Platform;
-
-XmlConfigurator.Configure(new FileStream("log4net.config", FileMode.Open));
 
 int strikeValue = 7;
 
@@ -21,7 +17,7 @@ SearchBobberFinder bobberFinder = new(pixelClassifier);
 PositionBiteWatcher biteWatcher = new(strikeValue);
 
 FishingBot bot = new(bobberFinder, biteWatcher, ConsoleKey.D4, new List<ConsoleKey> { ConsoleKey.D5 });
-bot.FishingEventHandler += (b, e) => LogManager.GetLogger("Fishbot").Info(e);
+bot.FishingEventHandler += (b, e) => Console.WriteLine(e);
 
 WowProcess.PressKey(ConsoleKey.Spacebar);
 Thread.Sleep(1500);

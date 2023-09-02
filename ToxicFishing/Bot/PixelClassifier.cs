@@ -1,11 +1,7 @@
-﻿using log4net;
-
-namespace ToxicFishing
+﻿namespace ToxicFishing
 {
     public partial class PixelClassifier
     {
-        private static readonly ILog Logger = LogManager.GetLogger("Fishbot");
-
         public enum ClassifierMode { Red, Blue }
         public ClassifierMode Mode { get; set; } = ClassifierMode.Red;
 
@@ -23,13 +19,13 @@ namespace ToxicFishing
         {
             if (isWowClasic)
             {
-                Logger.Info("Wow Classic configuration");
+                Console.WriteLine("Wow Classic configuration");
                 ColourMultiplier = 1;
                 ColourClosenessMultiplier = 1;
             }
             else
             {
-                Logger.Info("Wow Standard configuration");
+                Console.WriteLine("Wow Standard configuration");
             }
         }
 

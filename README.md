@@ -1,5 +1,3 @@
-Here's the translated README:
-
 # 🎣 ToxicFishing: Your Virtual Fishing Assistant in World of Warcraft 🎮
 
 Welcome to **ToxicFishing**, the virtual assistant designed to revolutionize your fishing experience in World of Warcraft. If you're looking for a way to automate the fishing process, you're in the right place!

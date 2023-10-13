@@ -11,30 +11,25 @@
         public bool IsMatch(byte red, byte green, byte blue)
         {
             return Mode == ClassifierMode.Red
-                ? isBigger(red, green, blue) && areClose(blue, green)
-                : isBigger(blue, green, red) && areClose(red, green);
+                ? IsBigger(red, green, blue) && AreClose(blue, green)
+                : IsBigger(blue, green, red) && AreClose(red, green);
         }
 
         public void SetConfiguration(bool isWowClasic)
         {
             if (isWowClasic)
             {
-                Console.WriteLine("Wow Classic configuration");
                 ColourMultiplier = 1;
                 ColourClosenessMultiplier = 1;
             }
-            else
-            {
-                Console.WriteLine("Wow Standard configuration");
-            }
         }
 
-        private bool isBigger(byte primary, byte comparison1, byte comparison2)
+        private bool IsBigger(byte primary, byte comparison1, byte comparison2)
         {
             return (primary * ColourMultiplier) > comparison1 && (primary * ColourMultiplier) > comparison2;
         }
 
-        private bool areClose(byte color1, byte color2)
+        private bool AreClose(byte color1, byte color2)
         {
             return Math.Min(color1, color2) * ColourClosenessMultiplier > Math.Max(color1, color2) - 20;
         }

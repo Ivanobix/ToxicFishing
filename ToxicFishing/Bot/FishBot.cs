@@ -28,13 +28,16 @@ namespace ToxicFishing.Bot
             StartTime = DateTime.Now;
         }
 
-        public async Task StartAsync()
+        public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             biteWatcher.FishingEventHandler = (e) => FishingEventHandler?.Invoke(this, e);
             DoTenMinuteKey();
 
             while (true)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    break;
+
                 try
                 {
                     PressTenMinKeyIfDue();
@@ -51,7 +54,10 @@ namespace ToxicFishing.Bot
                     await SleepAsync(2000);
                 }
             }
+
+            Console.WriteLine($"Bot stopped at: {DateTime.Now}");
         }
+
 
         private async Task WatchAsync(int milliseconds)
         {

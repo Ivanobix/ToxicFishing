@@ -5,15 +5,10 @@ namespace ToxicFishing.Bot
     public class PositionBiteWatcher
     {
         private SortedSet<int> yPositions = new();
-        private readonly int strikeValue;
+        private readonly int strikeValue = 7;
         private int yDiff;
 
         public Action<FishingEvent> FishingEventHandler { set; get; } = (e) => { };
-
-        public PositionBiteWatcher(int strikeValue)
-        {
-            this.strikeValue = strikeValue;
-        }
 
         public void RaiseEvent(FishingEvent ev)
         {

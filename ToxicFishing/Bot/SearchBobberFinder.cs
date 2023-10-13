@@ -13,6 +13,8 @@ namespace ToxicFishing.Bot
 
         public event EventHandler<BobberBitmapEvent> BitmapEvent = delegate { };
 
+        private static DateTime _lastConsoleWriteTime = DateTime.MinValue;
+
         public SearchBobberFinder(PixelClassifier pixelClassifier)
         {
             this.pixelClassifier = pixelClassifier;
@@ -60,27 +62,21 @@ namespace ToxicFishing.Bot
             for (int x = minX; x < maxX; x++)
             {
                 for (int y = minY; y < maxY; y++)
-                {
                     ProcessPixel(points, x, y);
-                }
             }
 
             sw.Stop();
 
-            if (sw.ElapsedMilliseconds > 200)
+            if (points.Count > 1000 && DateTime.Now - _lastConsoleWriteTime > TimeSpan.FromSeconds(1))
             {
-                string prevText = hasPreviousLocation ? " using previous location" : "";
-                Debug.WriteLine($"Feather points found: {points.Count} in {sw.ElapsedMilliseconds}{prevText}.");
-            }
-
-            if (points.Count > 1000)
-            {
-                Console.WriteLine("Error: Too much of the feather colour in this image, please adjust the colour configuration !");
+                Console.WriteLine("Error: There's an excessive amount of red (or colors resembling red like orange) at the center of your screen. To address this, please select a fishing area devoid of red hues.");
+                _lastConsoleWriteTime = DateTime.Now;
                 points.Clear();
             }
 
             return points;
         }
+
 
         private void ProcessPixel(List<Score> points, int x, int y)
         {
@@ -96,22 +92,9 @@ namespace ToxicFishing.Bot
         private Score? ScorePoints(List<Score> points)
         {
             foreach (Score p in points)
-            {
-                p.count = points.Count(s => Math.Abs(s.point.X - p.point.X) < 10 &&
-                                            Math.Abs(s.point.Y - p.point.Y) < 10);
-            }
+                p.count = points.Count(s => Math.Abs(s.point.X - p.point.X) < 10 && Math.Abs(s.point.Y - p.point.Y) < 10);
 
             Score? best = points.OrderByDescending(s => s.count).FirstOrDefault();
-
-            if (best != null)
-            {
-                // Uncomment if needed.
-                // Debug.WriteLine($"best score: {best.count} at {best.point.X},{best.point.Y}");
-            }
-            else
-            {
-                Debug.WriteLine("No red found");
-            }
 
             previousLocation = best?.point ?? Point.Empty;
 

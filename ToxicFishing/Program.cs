@@ -51,12 +51,17 @@ namespace ToxicFishing
 
         private static TimeSpan GetExecutionDuration(char choice)
         {
-            return choice switch
+            TimeSpan time = choice switch
             {
                 '1' => AskTimeSpan("\nHow many minutes?", TimeSpan.FromMinutes),
                 '2' => AskTimeSpan("\nHow many hours?", TimeSpan.FromHours),
                 _ => TimeSpan.Zero,
             };
+
+            if ((choice == '1' || choice == '2') && time == TimeSpan.Zero)
+                return GetExecutionDuration(choice);
+
+            return time;
         }
 
         private static TimeSpan AskTimeSpan(string prompt, Func<double, TimeSpan> timeConverter)

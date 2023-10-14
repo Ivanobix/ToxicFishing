@@ -8,13 +8,17 @@ namespace ToxicFishing
 {
     public class ToxicFishingApp
     {
-        public static void Main()
+        private const int CountdownSeconds = 5;
+
+        private enum EnvironmentChoice { Water, Lava }
+        private enum DurationChoice { Minutes, Hours, Indefinitely }
+
+        public static async Task Main()
         {
             PrintHeader();
-            Separate();
 
-            char environmentChoice = GetUserChoice(ConsoleColor.Cyan, "Where would you like to fish?", "Water", "Lava");
-            char durationChoice = GetUserChoice(ConsoleColor.Cyan, "How long do you want the bot to run?", "Minutes", "Hours", "Indefinitely");
+            EnvironmentChoice environmentChoice = (EnvironmentChoice)(GetUserChoice(ConsoleColor.Cyan, "Where would you like to fish?", "Water", "Lava") - '1');
+            DurationChoice durationChoice = (DurationChoice)(GetUserChoice(ConsoleColor.Cyan, "How long do you want the bot to run?", "Minutes", "Hours", "Indefinitely") - '1');
             TimeSpan executionDuration = GetExecutionDuration(durationChoice);
 
             Separate();
@@ -22,16 +26,19 @@ namespace ToxicFishing
             if (GetUserChoice(ConsoleColor.Cyan, "Choose an option:", "Start", "Exit") == '2')
                 return;
 
-            SetupAndStartBot(environmentChoice, durationChoice, executionDuration);
+            await SetupAndStartBot(environmentChoice, durationChoice, executionDuration);
         }
 
         private static void PrintHeader()
         {
-            var title = "TOXIC FISHING BOT";
-            int width = title.Length + 10;
+            const string Title = "TOXIC FISHING BOT";
+            int width = Title.Length + 10;
+
             PrintWithColor(ConsoleColor.Red, new string('#', width));
-            PrintWithColor(ConsoleColor.Yellow, $"### {title} ###");
+            PrintWithColor(ConsoleColor.Yellow, $"### {Title} ###");
             PrintWithColor(ConsoleColor.Red, new string('#', width));
+
+            Separate();
         }
 
         private static void Separate() => Console.WriteLine();
@@ -48,7 +55,7 @@ namespace ToxicFishing
             PrintWithColor(titleColor, title);
 
             int topPosition = Console.CursorTop;
-            var validChoices = new List<char>();
+            List<char> validChoices = new List<char>();
 
             for (int i = 0; i < options.Length; i++)
             {
@@ -85,17 +92,14 @@ namespace ToxicFishing
         }
 
 
-        private static TimeSpan GetExecutionDuration(char choice)
+        private static TimeSpan GetExecutionDuration(DurationChoice choice)
         {
-            switch (choice)
+            return choice switch
             {
-                case '1':
-                    return AskTimeSpan(ConsoleColor.Cyan, "How many minutes?", TimeSpan.FromMinutes);
-                case '2':
-                    return AskTimeSpan(ConsoleColor.Cyan, "How many hours?", TimeSpan.FromHours);
-                default:
-                    return TimeSpan.Zero;
-            }
+                DurationChoice.Minutes => AskTimeSpan(ConsoleColor.Cyan, "How many minutes?", TimeSpan.FromMinutes),
+                DurationChoice.Hours => AskTimeSpan(ConsoleColor.Cyan, "How many hours?", TimeSpan.FromHours),
+                _ => TimeSpan.Zero
+            };
         }
 
         private static TimeSpan AskTimeSpan(ConsoleColor promptColor, string prompt, Func<double, TimeSpan> timeConverter)
@@ -130,9 +134,9 @@ namespace ToxicFishing
         }
 
 
-        private static void SetupAndStartBot(char envChoice, char durationChoice, TimeSpan duration)
+        private static async Task SetupAndStartBot(EnvironmentChoice envChoice, DurationChoice durationChoice, TimeSpan duration)
         {
-            var mode = envChoice == '1' ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue;
+            PixelClassifier.ClassifierMode mode = envChoice == EnvironmentChoice.Water ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue;
             PixelClassifier pixelClassifier = new() { Mode = mode };
             pixelClassifier.SetConfiguration(WowProcess.IsWowClassic());
 
@@ -145,16 +149,16 @@ namespace ToxicFishing
 
             bot.FishingEventHandler += (b, e) => Console.WriteLine(e);
             Separate();
-            CountdownToStart(5);
+            CountdownToStart(CountdownSeconds);
 
             WowProcess.PressKey(ConsoleKey.Spacebar);
             Thread.Sleep(1500);
 
             CancellationTokenSource cts = new();
-            if (durationChoice != '3')
+            if (durationChoice != DurationChoice.Indefinitely)
                 cts.CancelAfter(duration);
 
-            bot.StartAsync(cts.Token).Wait();
+            await bot.StartAsync(cts.Token);
         }
 
         private static void CountdownToStart(int seconds)

@@ -13,13 +13,13 @@ namespace ToxicFishing
             PrintHeader();
             Separate();
 
-            char environmentChoice = GetUserChoice("Where would you like to fish?", "1. Water", "2. Lava");
-            char durationChoice = GetUserChoice("How long do you want the bot to run?", "1. Minutes", "2. Hours", "3. Indefinitely");
+            char environmentChoice = GetUserChoice(ConsoleColor.Cyan, "Where would you like to fish?", "Water", "Lava");
+            char durationChoice = GetUserChoice(ConsoleColor.Cyan, "How long do you want the bot to run?", "Minutes", "Hours", "Indefinitely");
             TimeSpan executionDuration = GetExecutionDuration(durationChoice);
 
             Separate();
 
-            if (GetUserChoice("Choose an option:", "1. Start", "2. Exit") == '2')
+            if (GetUserChoice(ConsoleColor.Cyan, "Choose an option:", "Start", "Exit") == '2')
                 return;
 
             SetupAndStartBot(environmentChoice, durationChoice, executionDuration);
@@ -27,9 +27,11 @@ namespace ToxicFishing
 
         private static void PrintHeader()
         {
-            PrintWithColor(ConsoleColor.Red, "###################################");
-            PrintWithColor(ConsoleColor.Yellow, "###      TOXIC FISHING BOT      ###");
-            PrintWithColor(ConsoleColor.Red, "###################################");
+            var title = "TOXIC FISHING BOT";
+            int width = title.Length + 10;
+            PrintWithColor(ConsoleColor.Red, new string('#', width));
+            PrintWithColor(ConsoleColor.Yellow, $"### {title} ###");
+            PrintWithColor(ConsoleColor.Red, new string('#', width));
         }
 
         private static void Separate() => Console.WriteLine();
@@ -38,52 +40,88 @@ namespace ToxicFishing
         {
             Console.ForegroundColor = color;
             Console.WriteLine(message);
-            Console.ForegroundColor = ConsoleColor.White;
+            Console.ResetColor();
         }
 
-        private static char GetUserChoice(string title, params string[] options)
+        private static char GetUserChoice(ConsoleColor titleColor, string title, params string[] options)
         {
-            PrintWithColor(ConsoleColor.Yellow, title);
+            PrintWithColor(titleColor, title);
 
-            foreach (var option in options)
+            int topPosition = Console.CursorTop;
+            var validChoices = new List<char>();
+
+            for (int i = 0; i < options.Length; i++)
             {
-                Console.WriteLine(option);
+                Console.WriteLine($"    {i + 1}. {options[i]}");
+                validChoices.Add((char)('1' + i));
             }
 
             char choice;
-            var validChoices = string.Join("", options).ToCharArray();
             do
             {
-                choice = Console.ReadKey().KeyChar;
-                if (!Array.Exists(validChoices, c => c == choice))
-                    PrintWithColor(ConsoleColor.Red, "Please select a valid option.");
+                choice = Console.ReadKey(true).KeyChar;
 
-            } while (!Array.Exists(validChoices, c => c == choice));
+                if (validChoices.Contains(choice))
+                {
+                    Console.SetCursorPosition(0, topPosition);
+                    for (int i = 0; i < options.Length; i++)
+                    {
+                        if (choice == (char)('1' + i))
+                            PrintWithColor(ConsoleColor.Yellow, $"    {i + 1}. {options[i]}");
+                        else
+                            Console.WriteLine($"    {i + 1}. {options[i]}");
+                    }
+                }
+                else
+                {
+                    Console.SetCursorPosition(0, topPosition + options.Length); // Set the cursor position to the end of the options
+                    Console.WriteLine(new string(' ', Console.WindowWidth)); // Clear the previous error message
+                    Console.SetCursorPosition(0, topPosition + options.Length); // Set the cursor back to the end of the options
+                    PrintWithColor(ConsoleColor.Red, "  > Please select a valid option.");
+                }
+            } while (!validChoices.Contains(choice));
 
             return choice;
         }
 
+
         private static TimeSpan GetExecutionDuration(char choice)
         {
-            return choice switch
+            switch (choice)
             {
-                '1' => AskTimeSpan("How many minutes?", TimeSpan.FromMinutes),
-                '2' => AskTimeSpan("How many hours?", TimeSpan.FromHours),
-                _ => TimeSpan.Zero,
-            };
+                case '1':
+                    return AskTimeSpan(ConsoleColor.Cyan, "How many minutes?", TimeSpan.FromMinutes);
+                case '2':
+                    return AskTimeSpan(ConsoleColor.Cyan, "How many hours?", TimeSpan.FromHours);
+                default:
+                    return TimeSpan.Zero;
+            }
         }
 
-        private static TimeSpan AskTimeSpan(string prompt, Func<double, TimeSpan> timeConverter)
+        private static TimeSpan AskTimeSpan(ConsoleColor promptColor, string prompt, Func<double, TimeSpan> timeConverter)
         {
-            PrintWithColor(ConsoleColor.Yellow, prompt);
+            PrintWithColor(promptColor, prompt + " (and then press Enter)");
 
-            return int.TryParse(Console.ReadLine(), out int time) ? timeConverter(time) : TimeSpan.Zero;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+
+            int leftPosition = Console.CursorLeft + 4;
+            Console.SetCursorPosition(leftPosition, Console.CursorTop);
+
+            if (int.TryParse(Console.ReadLine(), out int time))
+            {
+                Console.ResetColor();
+                return timeConverter(time);
+            }
+
+            Console.ResetColor();
+            PrintWithColor(ConsoleColor.Red, "Invalid input. Using default value: 0.");
+            return TimeSpan.Zero;
         }
+
 
         private static void SetupAndStartBot(char envChoice, char durationChoice, TimeSpan duration)
         {
             var mode = envChoice == '1' ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue;
-
             PixelClassifier pixelClassifier = new() { Mode = mode };
             pixelClassifier.SetConfiguration(WowProcess.IsWowClassic());
 
@@ -95,9 +133,7 @@ namespace ToxicFishing
             );
 
             bot.FishingEventHandler += (b, e) => Console.WriteLine(e);
-
             Separate();
-
             CountdownToStart(5);
 
             WowProcess.PressKey(ConsoleKey.Spacebar);
@@ -114,7 +150,7 @@ namespace ToxicFishing
         {
             for (int i = seconds; i > 0; i--)
             {
-                Console.WriteLine($"Starting in {i}...");
+                PrintWithColor(ConsoleColor.Magenta, $"Starting in {i}...");
                 Thread.Sleep(1000);
             }
         }

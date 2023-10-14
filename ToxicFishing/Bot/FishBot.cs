@@ -60,8 +60,7 @@ namespace ToxicFishing.Bot
             }
 
             DisplayStatistics();
-
-            Console.WriteLine($"Bot stopped at: {DateTime.Now}");
+            Console.ReadLine();
         }
 
 
@@ -148,7 +147,7 @@ namespace ToxicFishing.Bot
         {
             if (action == FishingAction.Cast)
             {
-                Console.Write("Casting...");
+                Console.Write("Casting... ");
                 numberOfCasts++;
             }
 

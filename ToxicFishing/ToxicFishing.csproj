@@ -6,11 +6,19 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<ApplicationIcon>ToxicFishing.ico</ApplicationIcon>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.SystemWebAdapters" Version="1.1.0" />
+	  <Content Include="ToxicFishing.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Resources\" />
 	</ItemGroup>
 
 </Project>

@@ -43,7 +43,7 @@ namespace ToxicFishing
                 @"                                                                                                \______/       ",
             };
 
-            PrintWithColor(ConsoleColor.Magenta, string.Join(Environment.NewLine, title));
+            PrintWithColor(ConsoleColor.Green, string.Join(Environment.NewLine, title));
 
             Separate();
         }
@@ -81,7 +81,7 @@ namespace ToxicFishing
                     for (int i = 0; i < options.Length; i++)
                     {
                         if (choice == (char)('1' + i))
-                            PrintWithColor(ConsoleColor.Magenta, $"    {i + 1}. {options[i]}");
+                            PrintWithColor(ConsoleColor.Green, $"    {i + 1}. {options[i]}");
                         else
                             Console.WriteLine($"    {i + 1}. {options[i]}");
                     }
@@ -118,7 +118,7 @@ namespace ToxicFishing
             {
                 PrintWithColor(promptColor, prompt + " (write a number and then press Enter)");
 
-                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.ForegroundColor = ConsoleColor.Green;
                 int leftPosition = Console.CursorLeft + 4;
                 Console.SetCursorPosition(leftPosition, Console.CursorTop);
 
@@ -163,7 +163,7 @@ namespace ToxicFishing
         {
             for (int i = seconds; i > 0; i--)
             {
-                PrintWithColor(ConsoleColor.Magenta, $"Starting in {i}...");
+                PrintWithColor(ConsoleColor.Green, $"Starting in {i}...");
                 Thread.Sleep(1000);
             }
         }

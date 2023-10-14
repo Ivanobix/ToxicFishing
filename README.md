@@ -2,7 +2,9 @@
 
 Welcome to **ToxicFishing**, the virtual assistant designed to revolutionize your fishing experience in World of Warcraft. If you're looking for a way to automate the fishing process, you're in the right place!
 
-![ToxicFishingWallpaper](https://github.com/Ivanobix/ToxicFishing/assets/56084434/ee2ac923-aee3-412e-ab65-b6b37d12cc8c)
+<p align="center">
+  <img src="[http://some_place.com/image.png](https://github.com/Ivanobix/ToxicFishing/assets/56084434/d5c5eae7-8f15-4a64-bf95-dbf7a1bc6330)" />
+</p>
 
 ## 🌟 What is ToxicFishing?
 

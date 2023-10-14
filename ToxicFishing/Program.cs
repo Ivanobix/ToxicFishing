@@ -100,22 +100,33 @@ namespace ToxicFishing
 
         private static TimeSpan AskTimeSpan(ConsoleColor promptColor, string prompt, Func<double, TimeSpan> timeConverter)
         {
-            PrintWithColor(promptColor, prompt + " (and then press Enter)");
+            TimeSpan result = TimeSpan.Zero;
+            bool isValid;
 
-            Console.ForegroundColor = ConsoleColor.Yellow;
-
-            int leftPosition = Console.CursorLeft + 4;
-            Console.SetCursorPosition(leftPosition, Console.CursorTop);
-
-            if (int.TryParse(Console.ReadLine(), out int time))
+            do
             {
-                Console.ResetColor();
-                return timeConverter(time);
-            }
+                PrintWithColor(promptColor, prompt + " (write a number and then press Enter)");
 
-            Console.ResetColor();
-            PrintWithColor(ConsoleColor.Red, "Invalid input. Using default value: 0.");
-            return TimeSpan.Zero;
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                int leftPosition = Console.CursorLeft + 4;
+                Console.SetCursorPosition(leftPosition, Console.CursorTop);
+
+                isValid = int.TryParse(Console.ReadLine(), out int time);
+
+                if (isValid)
+                {
+                    Console.ResetColor();
+                    result = timeConverter(time);
+                }
+                else
+                {
+                    Console.ResetColor();
+                    PrintWithColor(ConsoleColor.Red, "Invalid input. Please enter a valid number.");
+                }
+
+            } while (!isValid);
+
+            return result;
         }
 
 

@@ -34,9 +34,10 @@ To get the most out of ToxicFishing, follow these steps:
     1. Before using ToxicFishing, make sure you have auto-loot enabled in the game options.
     2. The fishing action should be assigned to number `4`, baits on `5`, and on `6` there should be a macro with the code: `"/click StaticPopup1Button1"`.
     3. Ensure you are in a fishing zone with your rod equipped.
-    4. Float detection is done by detecting the red feather, so on your screen, there should be no red-colored elements and the float should be in the central region of your main monitor.
+    4. If you have multiple monitors connected, make sure that the game is open on the main monitor, in full screen mode without borders.
+    5. If your monitor is too small the bot may not work properly.
 
-2. **Running ToxicFishing**: With everything set up in the game, start ToxicFishing.
+2. **Running ToxicFishing**: With everything set up in the game, start ToxicFishing (Execute the .exe file).
 
 3. **Watch and Relax**: Now, simply watch as your character fishes automatically and efficiently.
 

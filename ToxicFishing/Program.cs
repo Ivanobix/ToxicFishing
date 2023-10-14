@@ -28,12 +28,22 @@ namespace ToxicFishing
 
         private static void PrintHeader()
         {
-            const string Title = "TOXIC FISHING BOT";
-            int width = Title.Length + 10;
+            string[] title = new string[]
+            {
+                @"$$$$$$$$\                  $$\                 $$$$$$$$\ $$\           $$\       $$\                           ",
+                @"\__$$  __|                 \__|                $$  _____|\__|          $$ |      \__|                          ",
+                @"   $$ | $$$$$$\  $$\   $$\ $$\  $$$$$$$\       $$ |      $$\  $$$$$$$\ $$$$$$$\  $$\ $$$$$$$\   $$$$$$\        ",
+                @"   $$ |$$  __$$\ \$$\ $$  |$$ |$$  _____|      $$$$$\    $$ |$$  _____|$$  __$$\ $$ |$$  __$$\ $$  __$$\       ",
+                @"   $$ |$$ /  $$ | \$$$$  / $$ |$$ /            $$  __|   $$ |\$$$$$$\  $$ |  $$ |$$ |$$ |  $$ |$$ /  $$ |      ",
+                @"   $$ |$$ |  $$ | $$  $$<  $$ |$$ |            $$ |      $$ | \____$$\ $$ |  $$ |$$ |$$ |  $$ |$$ |  $$ |      ",
+                @"   $$ |\$$$$$$  |$$  /\$$\ $$ |\$$$$$$$\       $$ |      $$ |$$$$$$$  |$$ |  $$ |$$ |$$ |  $$ |\$$$$$$$ |      ",
+                @"   \__| \______/ \__/  \__|\__| \_______|      \__|      \__|\_______/ \__|  \__|\__|\__|  \__| \____$$ |      ",
+                @"                                                                                               $$\   $$ |      ",
+                @"                                                                                               \$$$$$$  |      ",
+                @"                                                                                                \______/       ",
+            };
 
-            PrintWithColor(ConsoleColor.Red, new string('#', width));
-            PrintWithColor(ConsoleColor.Yellow, $"### {Title} ###");
-            PrintWithColor(ConsoleColor.Red, new string('#', width));
+            PrintWithColor(ConsoleColor.Magenta, string.Join(Environment.NewLine, title));
 
             Separate();
         }
@@ -71,7 +81,7 @@ namespace ToxicFishing
                     for (int i = 0; i < options.Length; i++)
                     {
                         if (choice == (char)('1' + i))
-                            PrintWithColor(ConsoleColor.Yellow, $"    {i + 1}. {options[i]}");
+                            PrintWithColor(ConsoleColor.Magenta, $"    {i + 1}. {options[i]}");
                         else
                             Console.WriteLine($"    {i + 1}. {options[i]}");
                     }
@@ -108,7 +118,7 @@ namespace ToxicFishing
             {
                 PrintWithColor(promptColor, prompt + " (write a number and then press Enter)");
 
-                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Magenta;
                 int leftPosition = Console.CursorLeft + 4;
                 Console.SetCursorPosition(leftPosition, Console.CursorTop);
 
@@ -134,15 +144,8 @@ namespace ToxicFishing
         private static async Task SetupAndStartBot(EnvironmentChoice envChoice, DurationChoice durationChoice, TimeSpan duration)
         {
             PixelClassifier pixelClassifier = new() { Mode = envChoice == EnvironmentChoice.Water ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue };
+            FishingBot bot = new(new SearchBobberFinder(pixelClassifier),new PositionBiteWatcher());
 
-            FishingBot bot = new(
-                new SearchBobberFinder(pixelClassifier),
-                new PositionBiteWatcher(),
-                ConsoleKey.D4,
-                new List<ConsoleKey> { ConsoleKey.D5 }
-            );
-
-            bot.FishingEventHandler += (b, e) => Console.WriteLine(e);
             Separate();
             CountdownToStart(CountdownSeconds);
 

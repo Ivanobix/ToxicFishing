@@ -6,32 +6,36 @@ namespace ToxicFishing.Bot
 {
     public class FishingBot
     {
+        public event EventHandler<FishingEvent> FishingEventHandler = (s, e) => { };
+
         private static readonly Random random = new();
 
         private readonly SearchBobberFinder bobberFinder;
         private readonly PositionBiteWatcher biteWatcher;
         private readonly ConsoleKey castKey;
-        private readonly List<ConsoleKey> tenMinKey;
+        private readonly ConsoleKey applyLureKey;
         private readonly Stopwatch stopwatch = new();
 
-        private DateTime StartTime;
+        private DateTime StartTime = DateTime.Now;
 
-        public event EventHandler<FishingEvent> FishingEventHandler = (s, e) => { };
+        private int numberOfCasts = 0;
+        private int numberOfSuccessfulLoots = 0;
+        private int numberOfLuresApplied = 0;
+        private int numberOfTimeouts = 0;
 
-        public FishingBot(SearchBobberFinder bobberFinder, PositionBiteWatcher biteWatcher, ConsoleKey castKey, List<ConsoleKey> tenMinKey)
+        public FishingBot(SearchBobberFinder bobberFinder, PositionBiteWatcher biteWatcher)
         {
             this.bobberFinder = bobberFinder ?? throw new ArgumentNullException(nameof(bobberFinder));
             this.biteWatcher = biteWatcher ?? throw new ArgumentNullException(nameof(biteWatcher));
-            this.castKey = castKey;
-            this.tenMinKey = tenMinKey ?? new List<ConsoleKey>();
 
-            StartTime = DateTime.Now;
+            castKey = ConsoleKey.D4;
+            applyLureKey = ConsoleKey.D5;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken = default)
         {
             biteWatcher.FishingEventHandler = (e) => FishingEventHandler?.Invoke(this, e);
-            DoTenMinuteKey();
+            ApplyLure();
 
             while (true)
             {
@@ -40,7 +44,7 @@ namespace ToxicFishing.Bot
 
                 try
                 {
-                    PressTenMinKeyIfDue();
+                    ApplyLureIfDue();
                     InvokeFishingEvent(FishingAction.Cast);
 
                     WowProcess.PressKey(castKey);
@@ -54,6 +58,8 @@ namespace ToxicFishing.Bot
                     await SleepAsync(2000);
                 }
             }
+
+            DisplayStatistics();
 
             Console.WriteLine($"Bot stopped at: {DateTime.Now}");
         }
@@ -80,7 +86,7 @@ namespace ToxicFishing.Bot
                 return;
 
             biteWatcher.Reset(bobberPosition);
-            Console.WriteLine($"Bobber start position: {bobberPosition}");
+
             TimedAction timedTask = new((a) => { Console.WriteLine("Fishing timed out!"); }, 25_000, 25);
 
             while (true)
@@ -93,48 +99,43 @@ namespace ToxicFishing.Bot
                 if (biteWatcher.IsBite(currentBobberPosition))
                 {
                     Loot(bobberPosition);
-                    PressTenMinKeyIfDue();
+                    numberOfSuccessfulLoots++;
+                    ApplyLureIfDue();
                     return;
                 }
 
                 if (!timedTask.ExecuteIfDue())
+                {
+                    numberOfTimeouts++;
                     return;
+                }
 
-                await Task.Delay(100); // Adding a small delay to not saturate the loop
+                await Task.Delay(100);
             }
         }
 
-        private void PressTenMinKeyIfDue()
+        private void ApplyLureIfDue()
         {
-            if ((DateTime.Now - StartTime).TotalMinutes > 10 && tenMinKey.Any())
-                DoTenMinuteKey();
+            if ((DateTime.Now - StartTime).TotalMinutes > 10)
+                ApplyLure();
         }
 
-        private void DoTenMinuteKey()
+        private void ApplyLure()
         {
+            Console.Write($"\nUsing lure...\n");
+
+            WowProcess.PressKey(applyLureKey);
             StartTime = DateTime.Now;
+            numberOfLuresApplied++;
 
-            if (!tenMinKey.Any())
-            {
-                Console.WriteLine("Ten Minute Key: No keys defined in tenMinKey, so nothing to do (Define in call to FishingBot constructor).");
-                return;
-            }
-
-            InvokeFishingEvent(FishingAction.Cast);
-
-            foreach (ConsoleKey key in tenMinKey)
-            {
-                Console.WriteLine($"Ten Minute Key: Pressing key {key} to run a macro, delete junk fish or apply a lure etc.");
-                WowProcess.PressKey(key);
-            }
+            Thread.Sleep(5000);
         }
 
         private static void Loot(Point bobberPosition)
         {
-            Console.WriteLine("Right clicking mouse to Loot.");
-            WowProcess.RightClickMouse(bobberPosition);
+            Console.Write("Looting...\n");
 
-            Console.WriteLine("Trying to accept soulbound loot.");
+            WowProcess.RightClickMouse(bobberPosition);
             WowProcess.PressKey(ConsoleKey.D6);
         }
 
@@ -145,7 +146,24 @@ namespace ToxicFishing.Bot
 
         private void InvokeFishingEvent(FishingAction action)
         {
+            if (action == FishingAction.Cast)
+            {
+                Console.Write("Casting...");
+                numberOfCasts++;
+            }
+
             FishingEventHandler?.Invoke(this, new FishingEvent { Action = action });
+        }
+
+        private void DisplayStatistics()
+        {
+            Console.WriteLine();
+            Console.WriteLine($"====== Fishing Statistics ======");
+            Console.WriteLine($"Number of casts: {numberOfCasts}");
+            Console.WriteLine($"Number of successful loots: {numberOfSuccessfulLoots}");
+            Console.WriteLine($"Number of lures applied: {numberOfLuresApplied}");
+            Console.WriteLine($"Number of timeouts: {numberOfTimeouts}");
+            Console.WriteLine($"===============================\n");
         }
     }
 }

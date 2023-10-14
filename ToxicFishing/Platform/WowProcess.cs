@@ -12,12 +12,6 @@ namespace ToxicFishing.Platform
 
         private static Process? cachedWowProcess;
 
-        public static bool IsWowClassic()
-        {
-            Process? wowProcess = GetWowProcess();
-            return wowProcess?.ProcessName.Contains("classic", StringComparison.OrdinalIgnoreCase) ?? false;
-        }
-
         public static Process? GetWowProcess(string name = "")
         {
             if (cachedWowProcess != null && !cachedWowProcess.HasExited)

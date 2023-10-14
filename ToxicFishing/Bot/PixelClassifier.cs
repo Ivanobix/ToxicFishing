@@ -3,9 +3,9 @@
     public partial class PixelClassifier
     {
         public enum ClassifierMode { Red, Blue }
-        public ClassifierMode Mode { get; set; } = ClassifierMode.Red;
+        public ClassifierMode Mode { get; set; }
 
-        public double ColourMultiplier { get; set; } = 0.5;
+        public double ColourMultiplier => Mode == ClassifierMode.Red ? 0.5 : 1.5;
         public double ColourClosenessMultiplier { get; set; } = 2.0;
 
         public bool IsMatch(byte red, byte green, byte blue)
@@ -13,15 +13,6 @@
             return Mode == ClassifierMode.Red
                 ? IsBigger(red, green, blue) && AreClose(blue, green)
                 : IsBigger(blue, green, red) && AreClose(red, green);
-        }
-
-        public void SetConfiguration(bool isWowClasic)
-        {
-            if (isWowClasic)
-            {
-                ColourMultiplier = 1;
-                ColourClosenessMultiplier = 1;
-            }
         }
 
         private bool IsBigger(byte primary, byte comparison1, byte comparison2)

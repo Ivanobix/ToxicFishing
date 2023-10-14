@@ -1,8 +1,5 @@
 ﻿using ToxicFishing.Bot;
 using ToxicFishing.Platform;
-using System;
-using System.Collections.Generic;
-using System.Threading;
 
 namespace ToxicFishing
 {
@@ -55,7 +52,7 @@ namespace ToxicFishing
             PrintWithColor(titleColor, title);
 
             int topPosition = Console.CursorTop;
-            List<char> validChoices = new List<char>();
+            List<char> validChoices = new();
 
             for (int i = 0; i < options.Length; i++)
             {
@@ -136,9 +133,7 @@ namespace ToxicFishing
 
         private static async Task SetupAndStartBot(EnvironmentChoice envChoice, DurationChoice durationChoice, TimeSpan duration)
         {
-            PixelClassifier.ClassifierMode mode = envChoice == EnvironmentChoice.Water ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue;
-            PixelClassifier pixelClassifier = new() { Mode = mode };
-            pixelClassifier.SetConfiguration(WowProcess.IsWowClassic());
+            PixelClassifier pixelClassifier = new() { Mode = envChoice == EnvironmentChoice.Water ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue };
 
             FishingBot bot = new(
                 new SearchBobberFinder(pixelClassifier),

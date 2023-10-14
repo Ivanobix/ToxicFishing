@@ -69,7 +69,11 @@ namespace ToxicFishing.Bot
 
             if (points.Count > 1000 && DateTime.Now - _lastConsoleWriteTime > TimeSpan.FromSeconds(1))
             {
-                Console.WriteLine("Error: There's an excessive amount of red (or colors resembling red like orange) at the center of your screen. To address this, please select a fishing area devoid of red hues.");
+                if (pixelClassifier.Mode == PixelClassifier.ClassifierMode.Red)
+                    Console.WriteLine("Error: There's an excessive amount of red (or colors resembling red like orange) at the center of your screen. To address this, please select a fishing area devoid of red hues.");
+                else
+                    Console.WriteLine("Error: There's an excessive amount of blue (or colors resembling red like purple) at the center of your screen. To address this, please select a fishing area devoid of blue hues.");
+
                 _lastConsoleWriteTime = DateTime.Now;
                 points.Clear();
             }
@@ -83,10 +87,7 @@ namespace ToxicFishing.Bot
             Color p = bitmap.GetPixel(x, y);
 
             if (pixelClassifier.IsMatch(p.R, p.G, p.B))
-            {
                 points.Add(new Score { point = new Point(x, y) });
-                bitmap.SetPixel(x, y, pixelClassifier.Mode == PixelClassifier.ClassifierMode.Blue ? Color.Blue : Color.Red);
-            }
         }
 
         private Score? ScorePoints(List<Score> points)

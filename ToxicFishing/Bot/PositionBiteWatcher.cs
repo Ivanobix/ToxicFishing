@@ -4,7 +4,7 @@ namespace ToxicFishing.Bot
 {
     public class PositionBiteWatcher
     {
-        private SortedSet<int> yPositions = new();
+        private SortedSet<int> yPositions = [];
         private readonly int strikeValue = 7;
         private int yDiff;
 

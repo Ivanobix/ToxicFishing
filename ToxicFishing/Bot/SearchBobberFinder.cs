@@ -49,7 +49,7 @@ namespace ToxicFishing.Bot
 
         private List<Score> FindRedPoints()
         {
-            List<Score> points = new();
+            List<Score> points = [];
 
             bool hasPreviousLocation = previousLocation != Point.Empty;
             int minX = Math.Max(hasPreviousLocation ? previousLocation.X - 40 : 0, 0);

@@ -48,7 +48,10 @@ namespace ToxicFishing
             Separate();
         }
 
-        private static void Separate() => Console.WriteLine();
+        private static void Separate()
+        {
+            Console.WriteLine();
+        }
 
         private static void PrintWithColor(ConsoleColor color, string message)
         {
@@ -62,7 +65,7 @@ namespace ToxicFishing
             PrintWithColor(titleColor, title);
 
             int topPosition = Console.CursorTop;
-            List<char> validChoices = new();
+            List<char> validChoices = [];
 
             for (int i = 0; i < options.Length; i++)
             {
@@ -144,7 +147,7 @@ namespace ToxicFishing
         private static async Task SetupAndStartBot(EnvironmentChoice envChoice, DurationChoice durationChoice, TimeSpan duration)
         {
             PixelClassifier pixelClassifier = new() { Mode = envChoice == EnvironmentChoice.Water ? PixelClassifier.ClassifierMode.Red : PixelClassifier.ClassifierMode.Blue };
-            FishingBot bot = new(new SearchBobberFinder(pixelClassifier),new PositionBiteWatcher());
+            FishingBot bot = new(new SearchBobberFinder(pixelClassifier), new PositionBiteWatcher());
 
             Separate();
             CountdownToStart(CountdownSeconds);

@@ -22,13 +22,13 @@ namespace ToxicFishing.Platform
                 : new[] { name };
 
             cachedWowProcess = Process.GetProcesses().FirstOrDefault(x => names.Contains(x.ProcessName.ToLowerInvariant()));
-            
+
             if (cachedWowProcess == null)
             {
                 Console.WriteLine($"Failed to find the wow process, tried: {string.Join(", ", names)}");
                 Console.ReadLine();
                 Environment.Exit(0);
-            } 
+            }
 
             return cachedWowProcess;
         }

@@ -1,4 +1,4 @@
-﻿namespace ToxicFishing
+﻿namespace ToxicFishing.Bot
 {
     public partial class PixelClassifier
     {
@@ -17,7 +17,7 @@
 
         private bool IsBigger(byte primary, byte comparison1, byte comparison2)
         {
-            return (primary * ColourMultiplier) > comparison1 && (primary * ColourMultiplier) > comparison2;
+            return primary * ColourMultiplier > comparison1 && primary * ColourMultiplier > comparison2;
         }
 
         private bool AreClose(byte color1, byte color2)

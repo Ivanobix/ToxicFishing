@@ -28,6 +28,10 @@ ToxicFishing has been designed with utmost discretion in mind:
 
 ## 🎮 Setup and Use
 
+<p align="center">
+  <img src="https://github.com/Ivanobix/ToxicFishing/assets/56084434/20d524dc-c589-4633-bf6f-b627354d054b" />
+</p>
+
 To get the most out of ToxicFishing, follow these steps:
 
 1. **Preparations in World of Warcraft**:  

@@ -59,7 +59,3 @@ ToxicFishing is an enhanced and optimized version of the original project [Fishi
 ## 🙌 Acknowledgments
 
 A special thanks to [FishingFun](https://github.com/julianperrott/FishingFun) who was the original developer of the tool that I later decided to correct, expand, and optimize.
-
-## 📊 Statistics
-
-![Alt](https://repobeats.axiom.co/api/embed/627d78198961ba6a9dc97fae831d97709b3c1336.svg "Repobeats analytics image")
